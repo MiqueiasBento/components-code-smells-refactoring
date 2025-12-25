@@ -49,7 +49,7 @@ import {assertElementNode} from './assertions';
     '[class.cdk-drop-list-receiving]': '_dropListRef.isReceiving()',
   },
 })
-export class CdkDropList<T = any> implements OnDestroy {
+export class CdkDropList<T = unknown> implements OnDestroy {
   element = inject<ElementRef<HTMLElement>>(ElementRef);
   private _changeDetectorRef = inject(ChangeDetectorRef);
   private _scrollDispatcher = inject(ScrollDispatcher);
@@ -166,7 +166,7 @@ export class CdkDropList<T = any> implements OnDestroy {
 
   /** Emits when the user drops an item inside the container. */
   @Output('cdkDropListDropped')
-  readonly dropped: EventEmitter<CdkDragDrop<T, any>> = new EventEmitter<CdkDragDrop<T, any>>();
+  readonly dropped: EventEmitter<CdkDragDrop<T, T>> = new EventEmitter<CdkDragDrop<T, T>>();
 
   /**
    * Emits when the user has moved a new drag item into this container.

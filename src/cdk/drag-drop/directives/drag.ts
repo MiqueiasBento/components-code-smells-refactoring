@@ -68,7 +68,7 @@ export const CDK_DROP_LIST = new InjectionToken<CdkDropList>('CdkDropList');
   },
   providers: [{provide: CDK_DRAG_PARENT, useExisting: CdkDrag}],
 })
-export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
+export class CdkDrag<T = unknown> implements AfterViewInit, OnChanges, OnDestroy {
   element = inject<ElementRef<HTMLElement>>(ElementRef);
   dropContainer = inject<CdkDropList>(CDK_DROP_LIST, {optional: true, skipSelf: true})!;
   private _ngZone = inject(NgZone);
@@ -176,18 +176,18 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
   @Output('cdkDragEnded') readonly ended: EventEmitter<CdkDragEnd> = new EventEmitter<CdkDragEnd>();
 
   /** Emits when the user has moved the item into a new container. */
-  @Output('cdkDragEntered') readonly entered: EventEmitter<CdkDragEnter<any>> = new EventEmitter<
-    CdkDragEnter<any>
+  @Output('cdkDragEntered') readonly entered: EventEmitter<CdkDragEnter<T>> = new EventEmitter<
+    CdkDragEnter<T>
   >();
 
   /** Emits when the user removes the item its container by dragging it into another container. */
-  @Output('cdkDragExited') readonly exited: EventEmitter<CdkDragExit<any>> = new EventEmitter<
-    CdkDragExit<any>
+  @Output('cdkDragExited') readonly exited: EventEmitter<CdkDragExit<T>> = new EventEmitter<
+    CdkDragExit<T>
   >();
 
   /** Emits when the user drops the item inside a container. */
-  @Output('cdkDragDropped') readonly dropped: EventEmitter<CdkDragDrop<any>> = new EventEmitter<
-    CdkDragDrop<any>
+  @Output('cdkDragDropped') readonly dropped: EventEmitter<CdkDragDrop<T>> = new EventEmitter<
+    CdkDragDrop<T>
   >();
 
   /**

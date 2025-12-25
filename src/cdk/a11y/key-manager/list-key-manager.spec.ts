@@ -32,7 +32,7 @@ interface KeyEventTestContext {
 }
 
 describe('Key managers', () => {
-  let itemList: QueryList<any>;
+  let itemList: QueryList<FakeFocusable>;
   let fakeKeyEvents: {
     downArrow: KeyboardEvent;
     upArrow: KeyboardEvent;
@@ -45,7 +45,7 @@ describe('Key managers', () => {
   };
 
   beforeEach(() => {
-    itemList = new QueryList<any>();
+    itemList = new QueryList<FakeFocusable>();
     fakeKeyEvents = {
       downArrow: createKeyboardEvent('keydown', DOWN_ARROW),
       upArrow: createKeyboardEvent('keydown', UP_ARROW),
@@ -806,7 +806,7 @@ describe('Key managers', () => {
       });
 
       it('should throw if the items do not implement the getLabel method', () => {
-        const invalidQueryList = new QueryList<any>();
+        const invalidQueryList = new QueryList<ListKeyManagerOption>();
         invalidQueryList.reset([{disabled: false}]);
 
         const invalidManager = new ListKeyManager(

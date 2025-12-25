@@ -39,7 +39,7 @@ const escape = () => createKeyboardEvent('keydown', 27, 'Escape');
 const right = () => createKeyboardEvent('keydown', 39, 'ArrowRight');
 const left = () => createKeyboardEvent('keydown', 37, 'ArrowLeft');
 
-function clickOption(options: OptionPattern<any>[], index: number, mods?: ModifierKeys) {
+function clickOption(options: OptionPattern<string>[], index: number, mods?: ModifierKeys) {
   return {
     target: options[index].element(),
     shiftKey: mods?.shift,
@@ -47,7 +47,7 @@ function clickOption(options: OptionPattern<any>[], index: number, mods?: Modifi
   } as unknown as PointerEvent;
 }
 
-function clickTreeItem(items: TreeItemPattern<any>[], index: number, mods?: ModifierKeys) {
+function clickTreeItem(items: TreeItemPattern<string>[], index: number, mods?: ModifierKeys) {
   return {
     target: items[index].element(),
     shiftKey: mods?.shift,
@@ -62,7 +62,7 @@ function clickInput(inputEl: HTMLInputElement) {
 function _type(
   text: string,
   inputEl: HTMLInputElement,
-  combobox: ComboboxPattern<any, string>,
+  combobox: ComboboxPattern<TestOption | TreeItemPattern<string>, string>,
   allOptions: TestOption[] | TreeItemPattern<string>[],
   popup: ComboboxListboxPattern<string> | ComboboxTreePattern<string>,
   firstMatch: WritableSignal<string | undefined>,
@@ -77,9 +77,9 @@ function _type(
   );
   const options = allOptions.filter(o => o.searchTerm().startsWith(text));
   if (popup instanceof ComboboxListboxPattern) {
-    (popup.inputs.items as WritableSignal<any[]>).set(options);
+    (popup.inputs.items as WritableSignal<TestOption[]>).set(options as TestOption[]);
   } else if (popup instanceof ComboboxTreePattern) {
-    (popup.inputs.allItems as WritableSignal<any[]>).set(options);
+    (popup.inputs.allItems as WritableSignal<TreeItemPattern<string>[]>).set(options as TreeItemPattern<string>[]);
   }
   firstMatch.set(options[0]?.value());
   combobox.onFilter();
@@ -96,7 +96,7 @@ function getComboboxPattern(
   const firstMatch = signal<string | undefined>(undefined);
   const inputValue = signal('');
 
-  const combobox = new ComboboxPattern<any, string>({
+  const combobox = new ComboboxPattern<TestOption | TreeItemPattern<string>, string>({
     disabled: signal(inputs.disabled ?? false),
     readonly: signal(inputs.readonly ?? false),
     textDirection: signal(inputs.textDirection ?? 'ltr'),
@@ -123,7 +123,7 @@ function getListboxPattern(
     id: signal('listbox-1'),
     items: options,
     values: signal(initialValue ? [initialValue] : []),
-    combobox: signal(combobox) as any,
+    combobox: signal(combobox as ComboboxPattern<OptionPattern<string>, string>),
     activeItem: signal(undefined),
     typeaheadDelay: signal(500),
     wrap: signal(true),
@@ -167,7 +167,7 @@ function getTreePattern(
     id: signal('tree-1'),
     allItems: items,
     values: signal(initialValue ? [initialValue] : []),
-    combobox: signal(combobox) as any,
+    combobox: signal(combobox as ComboboxPattern<TreeItemPattern<string>, string>),
     activeItem: signal(undefined),
     typeaheadDelay: signal(500),
     wrap: signal(true),
@@ -241,7 +241,7 @@ describe('Combobox with Listbox Pattern', () => {
       'Cranberry',
     ]);
 
-    (combobox.inputs.popupControls as WritableSignal<any>).set(listbox);
+    (combobox.inputs.popupControls as WritableSignal<ComboboxListboxPattern<string> | undefined>).set(listbox);
 
     return {
       combobox,
@@ -367,7 +367,7 @@ describe('Combobox with Listbox Pattern', () => {
   });
 
   describe('Selection', () => {
-    let combobox: ComboboxPattern<any, string>;
+    let combobox: ComboboxPattern<TestOption, string>;
     let listbox: ComboboxListboxPattern<string>;
     let inputEl: HTMLInputElement;
     let options: () => TestOption[];
@@ -645,7 +645,7 @@ describe('Combobox with Tree Pattern', () => {
       {value: 'Grains', children: [{value: 'Rice'}, {value: 'Wheat'}]},
     ]);
 
-    (combobox.inputs.popupControls as WritableSignal<any>).set(tree);
+    (combobox.inputs.popupControls as WritableSignal<ComboboxTreePattern<string> | undefined>).set(tree);
 
     return {
       combobox,
@@ -739,7 +739,7 @@ describe('Combobox with Tree Pattern', () => {
   });
 
   describe('Selection', () => {
-    let combobox: ComboboxPattern<any, string>;
+    let combobox: ComboboxPattern<TreeItemPattern<string>, string>;
     let tree: ComboboxTreePattern<string>;
     let inputEl: HTMLInputElement;
     let items: () => TreeItemPattern<string>[];

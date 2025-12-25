@@ -318,7 +318,7 @@ export function defineCommonDropListTests(config: {
 
       expect(fixture.componentInstance.droppedSpy).toHaveBeenCalledTimes(1);
 
-      const event: CdkDragDrop<any> =
+      const event: CdkDragDrop<unknown> =
         fixture.componentInstance.droppedSpy.calls.mostRecent().args[0];
 
       expect(event.isPointerOverContainer).toBe(true);
@@ -336,7 +336,7 @@ export function defineCommonDropListTests(config: {
 
       expect(fixture.componentInstance.droppedSpy).toHaveBeenCalledTimes(1);
 
-      const event: CdkDragDrop<any> =
+      const event: CdkDragDrop<unknown> =
         fixture.componentInstance.droppedSpy.calls.mostRecent().args[0];
 
       expect(event.distance).toEqual({x: 50, y: 60});
@@ -362,7 +362,7 @@ export function defineCommonDropListTests(config: {
 
       expect(fixture.componentInstance.droppedSpy).toHaveBeenCalledTimes(1);
 
-      const event: CdkDragDrop<any> =
+      const event: CdkDragDrop<unknown> =
         fixture.componentInstance.droppedSpy.calls.mostRecent().args[0];
 
       expect(event.isPointerOverContainer).toBe(false);
@@ -2965,7 +2965,7 @@ export function defineCommonDropListTests(config: {
       const fixture = createComponent(DraggableInDropZone);
       fixture.detectChanges();
       const item = fixture.componentInstance.dragItems.toArray()[1].element.nativeElement;
-      const styles: any = fixture.componentInstance.dropInstance.element.nativeElement.style;
+      const styles: CSSStyleDeclaration = fixture.componentInstance.dropInstance.element.nativeElement.style;
 
       // This test only applies to browsers that support scroll snapping.
       if (!('scrollSnapType' in styles) && !('msScrollSnapType' in styles)) {
@@ -2990,7 +2990,7 @@ export function defineCommonDropListTests(config: {
       const fixture = createComponent(DraggableInDropZone);
       fixture.detectChanges();
       const item = fixture.componentInstance.dragItems.toArray()[1].element.nativeElement;
-      const styles: any = fixture.componentInstance.dropInstance.element.nativeElement.style;
+      const styles: CSSStyleDeclaration = fixture.componentInstance.dropInstance.element.nativeElement.style;
 
       // This test only applies to browsers that support scroll snapping.
       if (!('scrollSnapType' in styles) && !('msScrollSnapType' in styles)) {
