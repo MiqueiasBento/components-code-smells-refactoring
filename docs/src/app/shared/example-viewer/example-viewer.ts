@@ -22,7 +22,7 @@ import {Clipboard} from '@angular/cdk/clipboard';
 
 import {type LiveExample, loadExample} from '@angular/components-examples';
 import {CodeSnippet} from './code-snippet';
-import {normalizePath} from '../normalize-path';
+import {generateExampleTabs} from './example-tabs-generator';
 import {MatTab, MatTabGroup} from '@angular/material/tabs';
 import {StackblitzButton} from '../stackblitz/stackblitz-button';
 import {MatIcon} from '@angular/material/icon';
@@ -32,9 +32,6 @@ import {NgComponentOutlet} from '@angular/common';
 import {DocumentationItems} from '../documentation-items/documentation-items';
 
 export type Views = 'snippet' | 'full' | 'demo';
-
-/** Regular expression that matches a file name and its extension */
-const fileExtensionRegex = /(.*)\.(\w+)/;
 
 /** Preferred order for files of an example displayed in the viewer. */
 const preferredExampleFileOrder = ['HTML', 'TS', 'CSS'];
@@ -217,7 +214,7 @@ export class ExampleViewer {
     }
 
     try {
-      this._generateExampleTabs(this.exampleData());
+      this.exampleTabs.set(generateExampleTabs(this.exampleData(), this._example));
 
       // Lazily loads the example package that contains the requested example.
       const moduleExports = await loadExample(name);
@@ -232,43 +229,5 @@ export class ExampleViewer {
     } catch (e) {
       console.error(`Could not load example '${name}': ${e}`);
     }
-  }
-
-  private _generateExampleTabs(data: LiveExample | null) {
-    const tabs: Record<string, string> = {};
-
-    if (data) {
-      // Name of the default example files. If files with such name exist within the example,
-      // we provide a shorthand for them within the example tabs (for less verbose tabs).
-      const exampleBaseFileName = `${this.example}-example`;
-      const docsContentPath = `/docs-content/examples-highlighted/${data.packagePath}`;
-
-      const tsPath = normalizePath(`${exampleBaseFileName}.ts`);
-      const cssPath = normalizePath(`${exampleBaseFileName}.css`);
-      const htmlPath = normalizePath(`${exampleBaseFileName}.html`);
-
-      for (let fileName of data.files) {
-        // Since the additional files refer to the original file name, we need to transform
-        // the file name to match the highlighted HTML file that displays the source.
-        const fileSourceName = fileName.replace(fileExtensionRegex, '$1-$2.html');
-        const importPath = `${docsContentPath}/${fileSourceName}`;
-
-        // Normalize the path to allow for more consistent displaying in the tabs,
-        // and to make comparisons below more reliable.
-        fileName = normalizePath(fileName);
-
-        if (fileName === tsPath) {
-          tabs['TS'] = importPath;
-        } else if (fileName === cssPath) {
-          tabs['CSS'] = importPath;
-        } else if (fileName === htmlPath) {
-          tabs['HTML'] = importPath;
-        } else {
-          tabs[fileName] = importPath;
-        }
-      }
-    }
-
-    this.exampleTabs.set(tabs);
   }
 }
