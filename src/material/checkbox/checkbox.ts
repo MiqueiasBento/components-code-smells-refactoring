@@ -66,6 +66,25 @@ export enum TransitionCheckState {
   Indeterminate,
 }
 
+/**
+ * Configuration options for the checkbox.
+ */
+export interface MatCheckboxConfig {
+  id?: string;
+  name?: string | null;
+  value?: string;
+  required?: boolean;
+}
+
+/**
+ * State properties for the checkbox.
+ */
+export interface MatCheckboxState {
+  checked?: boolean;
+  disabled?: boolean;
+  indeterminate?: boolean;
+}
+
 /** Change event object emitted by checkbox. */
 export class MatCheckboxChange {
   /** The source checkbox of the event. */
@@ -151,6 +170,45 @@ export class MatCheckbox
   /** Object grouping all aria-related inputs. */
   @Input() aria: MatCheckboxAria = {};
 
+  /**
+   * Configuration for the checkbox.
+   */
+  @Input()
+  get config(): MatCheckboxConfig {
+    return {
+      id: this.id,
+      name: this.name,
+      value: this.value,
+      required: this.required,
+    };
+  }
+  set config(c: MatCheckboxConfig) {
+    if (c.id !== undefined) this.id = c.id;
+    if (c.name !== undefined) this.name = c.name;
+    if (c.value !== undefined) this.value = c.value;
+    if (c.required !== undefined) {
+      this.required = c.required;
+      this._validatorChangeFn();
+    }
+  }
+
+  /**
+   * State of the checkbox.
+   */
+  @Input()
+  get state(): MatCheckboxState {
+    return {
+      checked: this.checked,
+      disabled: this.disabled,
+      indeterminate: this.indeterminate,
+    };
+  }
+  set state(s: MatCheckboxState) {
+    if (s.checked !== undefined) this.checked = s.checked;
+    if (s.disabled !== undefined) this.disabled = s.disabled;
+    if (s.indeterminate !== undefined) this.indeterminate = s.indeterminate;
+  }
+
   private _appearance: MatCheckboxAppearance = {
     labelPosition: 'after',
     disableRipple: false,
@@ -171,7 +229,7 @@ export class MatCheckbox
   private _uniqueId: string;
 
   /** A unique id for the checkbox input. If none is supplied, it will be auto-generated. */
-  @Input() id: string;
+  id: string;
 
   /** Returns the unique id for the visual hidden input. */
   get inputId(): string {
@@ -179,10 +237,10 @@ export class MatCheckbox
   }
 
   /** Whether the checkbox is required. */
-  @Input({transform: booleanAttribute}) required: boolean;
+  required: boolean;
 
   /** Name value will be applied to the input element if present */
-  @Input() name: string | null = null;
+  name: string | null = null;
 
   /** Event emitted when the checkbox's `checked` value changes. */
   @Output() readonly change = new EventEmitter<MatCheckboxChange>();
@@ -191,7 +249,7 @@ export class MatCheckbox
   @Output() readonly indeterminateChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   /** The value attribute of the native input element */
-  @Input() value: string;
+  value: string;
 
   /** The native `<input type="checkbox">` element */
   @ViewChild('input') _inputElement: ElementRef<HTMLInputElement>;
@@ -226,9 +284,7 @@ export class MatCheckbox
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['required']) {
-      this._validatorChangeFn();
-    }
+    // Logic moved to config setter
   }
 
   ngAfterViewInit() {
@@ -236,7 +292,6 @@ export class MatCheckbox
   }
 
   /** Whether the checkbox is checked. */
-  @Input({transform: booleanAttribute})
   get checked(): boolean {
     return this._checked;
   }
@@ -249,7 +304,6 @@ export class MatCheckbox
   private _checked: boolean = false;
 
   /** Whether the checkbox is disabled. */
-  @Input({transform: booleanAttribute})
   get disabled(): boolean {
     return this._disabled;
   }
@@ -267,8 +321,6 @@ export class MatCheckbox
    * checkable items. Note that whenever checkbox is manually clicked, indeterminate is immediately
    * set to false.
    */
-  @Input({transform: booleanAttribute})
-  get indeterminate(): boolean {
     return this._indeterminate();
   }
   set indeterminate(value: boolean) {
