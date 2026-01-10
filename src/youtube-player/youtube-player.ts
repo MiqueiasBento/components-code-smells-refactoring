@@ -70,6 +70,27 @@ export interface YouTubePlayerConfig {
    * because not all video have a high-quality placeholder.
    */
   placeholderImageQuality?: PlaceholderImageQuality;
+  
+  /** Whether cookies inside the player have been disabled. */
+  disableCookies?: boolean;
+
+  /** Whether to show the iframe before API loads. */
+  showBeforeIframeApiLoads?: boolean;
+}
+
+/** Options for the video content. */
+export interface YouTubePlayerVideoOptions {
+  videoId?: string;
+  startSeconds?: number;
+  endSeconds?: number;
+  suggestedQuality?: YT.SuggestedVideoQuality;
+  playerVars?: YT.PlayerVars;
+}
+
+/** Dimensions of the player. */
+export interface YouTubePlayerDimensions {
+  height?: number;
+  width?: number;
 }
 
 export const DEFAULT_PLAYER_WIDTH = 640;
@@ -149,12 +170,115 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
   /** Whether we're currently rendering inside a browser. */
   private readonly _isBrowser: boolean;
 
-  /** YouTube Video ID to view */
+  /**
+   * Video content options.
+   */
   @Input()
+  get videoOptions(): YouTubePlayerVideoOptions {
+    return {
+      videoId: this.videoId,
+      startSeconds: this.startSeconds,
+      endSeconds: this.endSeconds,
+      suggestedQuality: this.suggestedQuality,
+      playerVars: this.playerVars
+    };
+  }
+  set videoOptions(o: YouTubePlayerVideoOptions) {
+    let recreate = false;
+    let cue = false;
+    let qual = false;
+
+    if (o.videoId !== undefined && o.videoId !== this.videoId) {
+       this.videoId = o.videoId;
+       recreate = true;
+    }
+    if (o.playerVars !== undefined && this._diffPlayerVars(o.playerVars, this.playerVars)) {
+       this.playerVars = o.playerVars;
+       recreate = true;
+    }
+    if (o.startSeconds !== undefined) {
+      this.startSeconds = o.startSeconds;
+      cue = true;
+    }
+    if (o.endSeconds !== undefined) {
+      this.endSeconds = o.endSeconds;
+      cue = true;
+    }
+    if (o.suggestedQuality !== undefined) {
+      this.suggestedQuality = o.suggestedQuality;
+      qual = true;
+      cue = true;
+    }
+
+    if (this._player) {
+       if (recreate) this._conditionallyLoad();
+       else {
+         if (qual) this._setQuality();
+         if (cue) this._cuePlayer();
+       }
+    }
+  }
+
+  /**
+   * Player dimensions.
+   */
+  @Input()
+  get dimensions(): YouTubePlayerDimensions {
+     return { height: this.height, width: this.width };
+  }
+  set dimensions(d: YouTubePlayerDimensions) {
+     let changed = false;
+     if (d.height !== undefined && d.height !== this.height) {
+        this.height = d.height;
+        changed = true;
+     }
+     if (d.width !== undefined && d.width !== this.width) {
+        this.width = d.width;
+        changed = true;
+     }
+     if (changed && this._player) {
+        this._setSize();
+     }
+  }
+
+  /**
+   * Player configuration.
+   */
+  @Input()
+  get config(): YouTubePlayerConfig {
+    return {
+      loadApi: this.loadApi,
+      disablePlaceholder: this.disablePlaceholder,
+      showBeforeIframeApiLoads: this.showBeforeIframeApiLoads,
+      placeholderButtonLabel: this.placeholderButtonLabel,
+      placeholderImageQuality: this.placeholderImageQuality,
+      disableCookies: this.disableCookies
+    };
+  }
+  set config(c: YouTubePlayerConfig) {
+    let recreate = false;
+    if (c.loadApi !== undefined) this.loadApi = c.loadApi;
+    if (c.disablePlaceholder !== undefined && c.disablePlaceholder !== this.disablePlaceholder) {
+       this.disablePlaceholder = c.disablePlaceholder;
+       recreate = true;
+    }
+    if (c.showBeforeIframeApiLoads !== undefined) this.showBeforeIframeApiLoads = c.showBeforeIframeApiLoads;
+    if (c.placeholderButtonLabel !== undefined) this.placeholderButtonLabel = c.placeholderButtonLabel;
+    if (c.placeholderImageQuality !== undefined) this.placeholderImageQuality = c.placeholderImageQuality;
+    if (c.disableCookies !== undefined && c.disableCookies !== this.disableCookies) {
+       this.disableCookies = c.disableCookies;
+       recreate = true;
+    }
+
+    if (recreate && this._player) {
+      this._conditionallyLoad();
+    }
+  }
+
+  /** YouTube Video ID to view */
   videoId: string | undefined;
 
   /** Height of video player */
-  @Input({transform: numberAttribute})
   get height(): number {
     return this._height;
   }
@@ -164,7 +288,6 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
   private _height = DEFAULT_PLAYER_HEIGHT;
 
   /** Width of video player */
-  @Input({transform: numberAttribute})
   get width(): number {
     return this._width;
   }
@@ -174,37 +297,30 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
   private _width = DEFAULT_PLAYER_WIDTH;
 
   /** The moment when the player is supposed to start playing */
-  @Input({transform: coerceTime})
   startSeconds: number | undefined;
 
   /** The moment when the player is supposed to stop playing */
-  @Input({transform: coerceTime})
   endSeconds: number | undefined;
 
   /** The suggested quality of the player */
-  @Input()
   suggestedQuality: YT.SuggestedVideoQuality | undefined;
 
   /**
    * Extra parameters used to configure the player. See:
    * https://developers.google.com/youtube/player_parameters.html?playerVersion=HTML5#Parameters
    */
-  @Input()
   playerVars: YT.PlayerVars | undefined;
 
   /** Whether cookies inside the player have been disabled. */
-  @Input({transform: booleanAttribute})
   disableCookies: boolean = false;
 
   /** Whether to automatically load the YouTube iframe API. Defaults to `true`. */
-  @Input({transform: booleanAttribute})
   loadApi: boolean;
 
   /**
    * By default the player shows a placeholder image instead of loading the YouTube API which
    * improves the initial page load performance. This input allows for the behavior to be disabled.
    */
-  @Input({transform: booleanAttribute})
   disablePlaceholder: boolean = false;
 
   /**
@@ -212,16 +328,16 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
    * page. Set this to true if you don't want the `onYouTubeIframeAPIReady` field to be
    * set on the global window.
    */
-  @Input({transform: booleanAttribute}) showBeforeIframeApiLoads: boolean = false;
+  showBeforeIframeApiLoads: boolean = false;
 
   /** Accessible label for the play button inside of the placeholder. */
-  @Input() placeholderButtonLabel: string;
+  placeholderButtonLabel: string;
 
   /**
    * Quality of the displayed placeholder image. Defaults to `standard`,
    * because not all video have a high-quality placeholder.
    */
-  @Input() placeholderImageQuality: PlaceholderImageQuality;
+  placeholderImageQuality: PlaceholderImageQuality;
 
   // Note: ready event can't go through the lazy emitter, because it
   // happens before the `_playerChanges` stream emits the new player.
@@ -270,21 +386,15 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (this._shouldRecreatePlayer(changes)) {
-      this._conditionallyLoad();
-    } else if (this._player) {
-      if (changes['width'] || changes['height']) {
-        this._setSize();
-      }
+     // Handling moved to config/dimensions/videoOptions setters
+  }
 
-      if (changes['suggestedQuality']) {
-        this._setQuality();
-      }
-
-      if (changes['startSeconds'] || changes['endSeconds'] || changes['suggestedQuality']) {
-        this._cuePlayer();
-      }
-    }
+  private _diffPlayerVars(a: YT.PlayerVars | undefined, b: YT.PlayerVars | undefined): boolean {
+    if (a === b) return false;
+    if (!a || !b) return true;
+    // Simple shallow check for demo purposes, or rely on reference check.
+    // Original code relied on SimpleChanges which checks reference.
+    return a !== b;
   }
 
   ngOnDestroy() {
