@@ -50,6 +50,32 @@ export interface MatTabGroupBaseHeader {
 /** Possible positions for the tab header. */
 export type MatTabHeaderPosition = 'above' | 'below';
 
+/** Appearance options for the tab group. */
+export interface MatTabGroupAppearance {
+  color?: ThemePalette;
+  backgroundColor?: ThemePalette;
+  headerPosition?: MatTabHeaderPosition;
+  fitInkBarToContent?: boolean;
+  stretchTabs?: boolean;
+  alignTabs?: string | null;
+  disableRipple?: boolean;
+}
+
+/** Behavior options for the tab group. */
+export interface MatTabGroupBehavior {
+  dynamicHeight?: boolean;
+  animationDuration?: string | number;
+  contentTabIndex?: number | null;
+  disablePagination?: boolean;
+  preserveContent?: boolean;
+}
+
+/** Aria options for the tab group. */
+export interface MatTabGroupAria {
+  label?: string;
+  labelledby?: string;
+}
+
 /** Boolean constant that determines whether the tab group supports the `backgroundColor` input */
 const ENABLE_BACKGROUND_INPUT = true;
 
@@ -129,11 +155,78 @@ export class MatTabGroup
    * For information on applying color variants in M3, see
    * https://material.angular.dev/guide/material-2-theming#optional-add-backwards-compatibility-styles-for-color-variants
    */
+  /**
+   * Appearance configuration.
+   */
+  @Input()
+  get appearance(): MatTabGroupAppearance {
+    return {
+      color: this.color,
+      backgroundColor: this.backgroundColor,
+      headerPosition: this.headerPosition,
+      fitInkBarToContent: this.fitInkBarToContent,
+      stretchTabs: this.stretchTabs,
+      alignTabs: this.alignTabs,
+      disableRipple: this.disableRipple
+    };
+  }
+  set appearance(a: MatTabGroupAppearance) {
+    if (a.color !== undefined) this.color = a.color;
+    if (a.backgroundColor !== undefined) this.backgroundColor = a.backgroundColor;
+    if (a.headerPosition !== undefined) this.headerPosition = a.headerPosition;
+    if (a.fitInkBarToContent !== undefined) this.fitInkBarToContent = a.fitInkBarToContent;
+    if (a.stretchTabs !== undefined) this.stretchTabs = a.stretchTabs;
+    if (a.alignTabs !== undefined) this.alignTabs = a.alignTabs;
+    if (a.disableRipple !== undefined) this.disableRipple = a.disableRipple;
+  }
+
+  /**
+   * Behavior configuration.
+   */
+  @Input()
+  get config(): MatTabGroupBehavior {
+    return {
+      dynamicHeight: this.dynamicHeight,
+      animationDuration: this.animationDuration,
+      contentTabIndex: this.contentTabIndex,
+      disablePagination: this.disablePagination,
+      preserveContent: this.preserveContent
+    };
+  }
+  set config(c: MatTabGroupBehavior) {
+    if (c.dynamicHeight !== undefined) this.dynamicHeight = c.dynamicHeight;
+    if (c.animationDuration !== undefined) this.animationDuration = c.animationDuration;
+    if (c.contentTabIndex !== undefined) this.contentTabIndex = c.contentTabIndex;
+    if (c.disablePagination !== undefined) this.disablePagination = c.disablePagination;
+    if (c.preserveContent !== undefined) this.preserveContent = c.preserveContent;
+  }
+
+  /**
+   * Aria configuration.
+   */
+  @Input()
+  get aria(): MatTabGroupAria {
+    return {
+      label: this.ariaLabel,
+      labelledby: this.ariaLabelledby
+    };
+  }
+  set aria(a: MatTabGroupAria) {
+    if (a.label !== undefined) this.ariaLabel = a.label;
+    if (a.labelledby !== undefined) this.ariaLabelledby = a.labelledby;
+  }
+
+  /**
+   * Theme color of the tab group. This API is supported in M2 themes only, it
+   * has no effect in M3 themes. For color customization in M3, see https://material.angular.dev/components/tabs/styling.
+   *
+   * For information on applying color variants in M3, see
+   * https://material.angular.dev/guide/material-2-theming#optional-add-backwards-compatibility-styles-for-color-variants
+   */
   @Input()
   color: ThemePalette;
 
   /** Whether the ink bar should fit its width to the size of the tab label content. */
-  @Input({transform: booleanAttribute})
   get fitInkBarToContent(): boolean {
     return this._fitInkBarToContent;
   }
@@ -144,15 +237,12 @@ export class MatTabGroup
   private _fitInkBarToContent = false;
 
   /** Whether tabs should be stretched to fill the header. */
-  @Input({alias: 'mat-stretch-tabs', transform: booleanAttribute})
   stretchTabs: boolean = true;
 
   /** Alignment for tabs label. */
-  @Input({alias: 'mat-align-tabs'})
   alignTabs: string | null = null;
 
   /** Whether the tab group should grow to the size of the active tab. */
-  @Input({transform: booleanAttribute})
   dynamicHeight: boolean = false;
 
   /** The index of the active tab. */
@@ -166,10 +256,9 @@ export class MatTabGroup
   private _selectedIndex: number | null = null;
 
   /** Position of the tab header. */
-  @Input() headerPosition: MatTabHeaderPosition = 'above';
+  headerPosition: MatTabHeaderPosition = 'above';
 
   /** Duration for the tab animation. Will be normalized to milliseconds if no units are set. */
-  @Input()
   get animationDuration(): string {
     return this._animationDuration;
   }
@@ -185,7 +274,6 @@ export class MatTabGroup
    * The `tabindex` will be removed automatically for inactive tabs.
    * Read more at https://www.w3.org/TR/wai-aria-practices/examples/tabs/tabs-2/tabs.html
    */
-  @Input({transform: numberAttribute})
   get contentTabIndex(): number | null {
     return this._contentTabIndex;
   }
@@ -200,11 +288,9 @@ export class MatTabGroup
    * Whether pagination should be disabled. This can be used to avoid unnecessary
    * layout recalculations if it's known that pagination won't be required.
    */
-  @Input({transform: booleanAttribute})
   disablePagination: boolean = false;
 
   /** Whether ripples in the tab group are disabled. */
-  @Input({transform: booleanAttribute})
   disableRipple: boolean = false;
 
   /**
@@ -212,7 +298,6 @@ export class MatTabGroup
    * Setting this to `true` will keep it in the DOM which will prevent elements
    * like iframes and videos from reloading next time it comes back into the view.
    */
-  @Input({transform: booleanAttribute})
   preserveContent: boolean = false;
 
   /**
@@ -225,7 +310,6 @@ export class MatTabGroup
    * @deprecated The background color should be customized through Sass theming APIs.
    * @breaking-change 20.0.0 Remove this input
    */
-  @Input()
   get backgroundColor(): ThemePalette {
     return this._backgroundColor;
   }
@@ -249,10 +333,10 @@ export class MatTabGroup
   private _backgroundColor: ThemePalette;
 
   /** Aria label of the inner `tablist` of the group. */
-  @Input('aria-label') ariaLabel: string;
+  ariaLabel: string;
 
   /** Sets the `aria-labelledby` of the inner `tablist` of the group. */
-  @Input('aria-labelledby') ariaLabelledby: string;
+  ariaLabelledby: string;
 
   /** Output to enable support for two-way binding on `[(selectedIndex)]` */
   @Output() readonly selectedIndexChange: EventEmitter<number> = new EventEmitter<number>();
