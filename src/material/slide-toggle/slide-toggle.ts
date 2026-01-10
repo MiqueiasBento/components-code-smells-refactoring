@@ -57,6 +57,32 @@ export class MatSlideToggleChange {
   ) {}
 }
 
+/** Appearance options for the slide toggle. */
+export interface MatSlideToggleAppearance {
+  color?: string;
+  labelPosition?: 'before' | 'after';
+  hideIcon?: boolean;
+  disableRipple?: boolean;
+  disabledInteractive?: boolean;
+}
+
+/** Configuration options for the slide toggle. */
+export interface MatSlideToggleConfig {
+  name?: string | null;
+  id?: string;
+  required?: boolean;
+  tabIndex?: number;
+  ariaLabel?: string | null;
+  ariaLabelledby?: string | null;
+  ariaDescribedby?: string;
+}
+
+/** State properties for the slide toggle. */
+export interface MatSlideToggleState {
+  checked?: boolean;
+  disabled?: boolean;
+}
+
 @Component({
   selector: 'mat-slide-toggle',
   templateUrl: 'slide-toggle.html',
@@ -131,26 +157,93 @@ export class MatSlideToggle
   /** Whether the slide toggle is currently focused. */
   _focused: boolean;
 
+  /**
+   * Appearance configuration.
+   */
+  @Input()
+  get appearance(): MatSlideToggleAppearance {
+    return {
+      color: this.color,
+      labelPosition: this.labelPosition,
+      hideIcon: this.hideIcon,
+      disableRipple: this.disableRipple,
+      disabledInteractive: this.disabledInteractive
+    };
+  }
+  set appearance(a: MatSlideToggleAppearance) {
+    if (a.color !== undefined) this.color = a.color;
+    if (a.labelPosition !== undefined) this.labelPosition = a.labelPosition;
+    if (a.hideIcon !== undefined) this.hideIcon = a.hideIcon;
+    if (a.disableRipple !== undefined) this.disableRipple = a.disableRipple;
+    if (a.disabledInteractive !== undefined) this.disabledInteractive = a.disabledInteractive;
+  }
+
+  /**
+   * Structural and Accessibility configuration.
+   */
+  @Input()
+  get config(): MatSlideToggleConfig {
+    return {
+      name: this.name,
+      id: this.id,
+      required: this.required,
+      tabIndex: this.tabIndex,
+      ariaLabel: this.ariaLabel,
+      ariaLabelledby: this.ariaLabelledby,
+      ariaDescribedby: this.ariaDescribedby
+    };
+  }
+  set config(c: MatSlideToggleConfig) {
+    if (c.name !== undefined) this.name = c.name;
+    if (c.id !== undefined) this.id = c.id;
+    if (c.required !== undefined) {
+       this.required = c.required;
+       this._validatorOnChange();
+    }
+    if (c.tabIndex !== undefined) this.tabIndex = c.tabIndex;
+    if (c.ariaLabel !== undefined) this.ariaLabel = c.ariaLabel;
+    if (c.ariaLabelledby !== undefined) this.ariaLabelledby = c.ariaLabelledby;
+    if (c.ariaDescribedby !== undefined) this.ariaDescribedby = c.ariaDescribedby;
+  }
+
+  /**
+   * State properties.
+   */
+  @Input()
+  get state(): MatSlideToggleState {
+    return {
+      checked: this.checked,
+      disabled: this.disabled
+    };
+  }
+  set state(s: MatSlideToggleState) {
+    if (s.checked !== undefined) this.checked = s.checked;
+    if (s.disabled !== undefined) {
+      this.disabled = s.disabled;
+      this._changeDetectorRef.markForCheck();
+    }
+  }
+
   /** Name value will be applied to the input element if present. */
-  @Input() name: string | null = null;
+  name: string | null = null;
 
   /** A unique id for the slide-toggle input. If none is supplied, it will be auto-generated. */
-  @Input() id: string;
+  id: string;
 
   /** Whether the label should appear after or before the slide-toggle. Defaults to 'after'. */
-  @Input() labelPosition: 'before' | 'after' = 'after';
+  labelPosition: 'before' | 'after' = 'after';
 
   /** Used to set the aria-label attribute on the underlying input element. */
-  @Input('aria-label') ariaLabel: string | null = null;
+  ariaLabel: string | null = null;
 
   /** Used to set the aria-labelledby attribute on the underlying input element. */
-  @Input('aria-labelledby') ariaLabelledby: string | null = null;
+  ariaLabelledby: string | null = null;
 
   /** Used to set the aria-describedby attribute on the underlying input element. */
-  @Input('aria-describedby') ariaDescribedby: string;
+  ariaDescribedby: string;
 
   /** Whether the slide-toggle is required. */
-  @Input({transform: booleanAttribute}) required: boolean;
+  required: boolean;
 
   // TODO(crisbeto): this should be a ThemePalette, but some internal apps were abusing
   // the lack of type checking previously and assigning random strings.
@@ -161,20 +254,18 @@ export class MatSlideToggle
    * For information on applying color variants in M3, see
    * https://material.angular.dev/guide/material-2-theming#optional-add-backwards-compatibility-styles-for-color-variants
    */
-  @Input() color: string | undefined;
+  @Input('color') color: string | undefined;
 
   /** Whether the slide toggle is disabled. */
-  @Input({transform: booleanAttribute}) disabled: boolean = false;
+  disabled: boolean = false;
 
   /** Whether the slide toggle has a ripple. */
-  @Input({transform: booleanAttribute}) disableRipple: boolean = false;
+  disableRipple: boolean = false;
 
   /** Tabindex of slide toggle. */
-  @Input({transform: (value: unknown) => (value == null ? 0 : numberAttribute(value))})
   tabIndex: number = 0;
 
   /** Whether the slide-toggle element is checked or not. */
-  @Input({transform: booleanAttribute})
   get checked(): boolean {
     return this._checked;
   }
@@ -184,10 +275,10 @@ export class MatSlideToggle
   }
 
   /** Whether to hide the icon inside of the slide toggle. */
-  @Input({transform: booleanAttribute}) hideIcon: boolean;
+  hideIcon: boolean;
 
   /** Whether the slide toggle should remain interactive when it is disabled. */
-  @Input({transform: booleanAttribute}) disabledInteractive: boolean;
+  disabledInteractive: boolean;
 
   /** An event will be dispatched each time the slide-toggle changes its value. */
   @Output() readonly change = new EventEmitter<MatSlideToggleChange>();
@@ -240,9 +331,7 @@ export class MatSlideToggle
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['required']) {
-      this._validatorOnChange();
-    }
+     // Managed in config setter
   }
 
   ngOnDestroy() {
