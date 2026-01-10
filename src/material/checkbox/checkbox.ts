@@ -46,6 +46,8 @@ import {
   checkboxDefaults,
   MAT_CHECKBOX_DEFAULT_OPTIONS,
   MatCheckboxDefaultOptions,
+  MatCheckboxAria,
+  MatCheckboxAppearance,
 } from './checkbox-config';
 import {_CdkPrivateStyleLoader} from '@angular/cdk/private';
 
@@ -87,8 +89,8 @@ export class MatCheckboxChange {
     // Add classes that users can use to more easily target disabled or checked checkboxes.
     '[class.mat-mdc-checkbox-disabled]': 'disabled',
     '[class.mat-mdc-checkbox-checked]': 'checked',
-    '[class.mat-mdc-checkbox-disabled-interactive]': 'disabledInteractive',
-    '[class]': 'color ? "mat-" + color : "mat-accent"',
+    '[class.mat-mdc-checkbox-disabled-interactive]': 'appearance.disabledInteractive',
+    '[class]': 'appearance.color ? "mat-" + appearance.color : "mat-accent"',
   },
   providers: [
     {
@@ -146,32 +148,25 @@ export class MatCheckbox
     indeterminateToUnchecked: 'mdc-checkbox--anim-indeterminate-unchecked',
   };
 
-  /**
-   * Attached to the aria-label attribute of the host element. In most cases, aria-labelledby will
-   * take precedence so this may be omitted.
-   */
-  @Input('aria-label') ariaLabel: string = '';
+  /** Object grouping all aria-related inputs. */
+  @Input() aria: MatCheckboxAria = {};
 
-  /**
-   * Users can specify the `aria-labelledby` attribute which will be forwarded to the input element
-   */
-  @Input('aria-labelledby') ariaLabelledby: string | null = null;
+  private _appearance: MatCheckboxAppearance = {
+    labelPosition: 'after',
+    disableRipple: false,
+    disabledInteractive: false,
+    tabIndex: 0,
+    color: undefined
+  };
 
-  /** The 'aria-describedby' attribute is read after the element's label and field type. */
-  @Input('aria-describedby') ariaDescribedby: string;
-
-  /**
-   * Users can specify the `aria-expanded` attribute which will be forwarded to the input element
-   */
-  @Input({alias: 'aria-expanded', transform: booleanAttribute}) ariaExpanded: boolean;
-
-  /**
-   * Users can specify the `aria-controls` attribute which will be forwarded to the input element
-   */
-  @Input('aria-controls') ariaControls: string;
-
-  /** Users can specify the `aria-owns` attribute which will be forwarded to the input element */
-  @Input('aria-owns') ariaOwns: string;
+  /** Object grouping appearance and behavior configuration. */
+  @Input()
+  get appearance(): MatCheckboxAppearance {
+    return this._appearance;
+  }
+  set appearance(value: MatCheckboxAppearance) {
+    this._appearance = { ...this._appearance, ...value };
+  }
 
   private _uniqueId: string;
 
@@ -186,9 +181,6 @@ export class MatCheckbox
   /** Whether the checkbox is required. */
   @Input({transform: booleanAttribute}) required: boolean;
 
-  /** Whether the label should appear after or before the checkbox. Defaults to 'after' */
-  @Input() labelPosition: 'before' | 'after' = 'after';
-
   /** Name value will be applied to the input element if present */
   @Input() name: string | null = null;
 
@@ -201,33 +193,11 @@ export class MatCheckbox
   /** The value attribute of the native input element */
   @Input() value: string;
 
-  /** Whether the checkbox has a ripple. */
-  @Input({transform: booleanAttribute}) disableRipple: boolean;
-
   /** The native `<input type="checkbox">` element */
   @ViewChild('input') _inputElement: ElementRef<HTMLInputElement>;
 
   /** The native `<label>` element */
   @ViewChild('label') _labelElement: ElementRef<HTMLInputElement>;
-
-  /** Tabindex for the checkbox. */
-  @Input({transform: (value: unknown) => (value == null ? undefined : numberAttribute(value))})
-  tabIndex: number;
-
-  // TODO(crisbeto): this should be a ThemePalette, but some internal apps were abusing
-  // the lack of type checking previously and assigning random strings.
-  /**
-   * Theme color of the checkbox. This API is supported in M2 themes only, it
-   * has no effect in M3 themes. For color customization in M3, see https://material.angular.dev/components/checkbox/styling.
-   *
-   * For information on applying color variants in M3, see
-   * https://material.angular.dev/guide/material-2-theming#optional-add-backwards-compatibility-styles-for-color-variants
-   */
-  @Input() color: string | undefined;
-
-  /** Whether the checkbox should remain interactive when it is disabled. */
-  @Input({transform: booleanAttribute})
-  disabledInteractive: boolean;
 
   /**
    * Called when the checkbox is blurred. Needed to properly implement ControlValueAccessor.
@@ -246,10 +216,13 @@ export class MatCheckbox
     inject(_CdkPrivateStyleLoader).load(_StructuralStylesLoader);
     const tabIndex = inject(new HostAttributeToken('tabindex'), {optional: true});
     this._options = this._options || checkboxDefaults;
-    this.color = this._options.color || checkboxDefaults.color;
-    this.tabIndex = tabIndex == null ? 0 : parseInt(tabIndex) || 0;
+    
+    // Initialize appearance defaults with injected options
+    this._appearance.color = this._options.color || checkboxDefaults.color;
+    this._appearance.tabIndex = tabIndex == null ? 0 : parseInt(tabIndex) || 0;
+    this._appearance.disabledInteractive = this._options?.disabledInteractive ?? false;
+
     this.id = this._uniqueId = inject(_IdGenerator).getId('mat-mdc-checkbox-');
-    this.disabledInteractive = this._options?.disabledInteractive ?? false;
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -318,7 +291,7 @@ export class MatCheckbox
   private _indeterminate = signal(false);
 
   _isRippleDisabled() {
-    return this.disableRipple || this.disabled;
+    return this.appearance.disableRipple || this.disabled;
   }
 
   /** Method being called whenever the label text changes. */
@@ -432,7 +405,7 @@ export class MatCheckbox
       // we don't want to trigger a change event, when the `checked` variable changes for example.
       this._emitChangeEvent();
     } else if (
-      (this.disabled && this.disabledInteractive) ||
+      (this.disabled && this.appearance.disabledInteractive) ||
       (!this.disabled && clickAction === 'noop')
     ) {
       // Reset native input when clicked with noop. The native checkbox becomes checked after

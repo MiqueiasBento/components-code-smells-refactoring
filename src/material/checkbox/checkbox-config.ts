@@ -49,3 +49,22 @@ export const MAT_CHECKBOX_DEFAULT_OPTIONS = new InjectionToken<MatCheckboxDefaul
  * undefined: Same as `check-indeterminate`.
  */
 export type MatCheckboxClickAction = 'noop' | 'check' | 'check-indeterminate' | undefined;
+
+/** Represents the ARIA attributes for the checkbox. */
+export interface MatCheckboxAria {
+  label?: string;
+  labelledby?: string | null;
+  describedby?: string;
+  expanded?: boolean;
+  controls?: string;
+  owns?: string;
+}
+
+/** Represents the appearance and behavior configuration for the checkbox. */
+export interface MatCheckboxAppearance {
+  labelPosition?: 'before' | 'after';
+  disableRipple?: boolean;
+  color?: string | undefined;
+  disabledInteractive?: boolean;
+  tabIndex?: number;
+}

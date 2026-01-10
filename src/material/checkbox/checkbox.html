@@ -1,4 +1,4 @@
-<div mat-internal-form-field [labelPosition]="labelPosition" (click)="_preventBubblingFromLabel($event)">
+<div mat-internal-form-field [labelPosition]="appearance.labelPosition" (click)="_preventBubblingFromLabel($event)">
   <div #checkbox class="mdc-checkbox">
     <!-- Render this element first so the input is on top. -->
     <div class="mat-mdc-checkbox-touch-target" (click)="_onTouchTargetClick()"></div>
@@ -6,22 +6,22 @@
            type="checkbox"
            class="mdc-checkbox__native-control"
            [class.mdc-checkbox--selected]="checked"
-           [attr.aria-label]="ariaLabel || null"
-           [attr.aria-labelledby]="ariaLabelledby"
-           [attr.aria-describedby]="ariaDescribedby"
+           [attr.aria-label]="aria.label || null"
+           [attr.aria-labelledby]="aria.labelledby"
+           [attr.aria-describedby]="aria.describedby"
            [attr.aria-checked]="indeterminate ? 'mixed' : null"
-           [attr.aria-controls]="ariaControls"
-           [attr.aria-disabled]="disabled && disabledInteractive ? true : null"
-           [attr.aria-expanded]="ariaExpanded"
-           [attr.aria-owns]="ariaOwns"
+           [attr.aria-controls]="aria.controls"
+           [attr.aria-disabled]="disabled && appearance.disabledInteractive ? true : null"
+           [attr.aria-expanded]="aria.expanded"
+           [attr.aria-owns]="aria.owns"
            [attr.name]="name"
            [attr.value]="value"
            [checked]="checked"
            [indeterminate]="indeterminate"
-           [disabled]="disabled && !disabledInteractive"
+           [disabled]="disabled && !appearance.disabledInteractive"
            [id]="inputId"
            [required]="required"
-           [tabIndex]="disabled && !disabledInteractive ? -1 : tabIndex"
+           [tabIndex]="disabled && !appearance.disabledInteractive ? -1 : appearance.tabIndex"
            (blur)="_onBlur()"
            (click)="_onInputClick()"
            (change)="_onInteractionEvent($event)"/>
@@ -39,7 +39,7 @@
     </div>
     <div class="mat-mdc-checkbox-ripple mat-focus-indicator" mat-ripple
       [matRippleTrigger]="checkbox"
-      [matRippleDisabled]="disableRipple || disabled"
+      [matRippleDisabled]="appearance.disableRipple || disabled"
       [matRippleCentered]="true"></div>
   </div>
   <!--
