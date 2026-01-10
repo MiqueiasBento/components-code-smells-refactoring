@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import {Component, OnDestroy, ViewEncapsulation, inject} from '@angular/core';
+import {Component, OnDestroy, ViewEncapsulation, inject, DOCUMENT} from '@angular/core';
 
 import {AnalyticsService} from './shared/analytics/analytics';
 import {NavigationFocusService} from './shared/navigation-focus/navigation-focus.service';
@@ -31,6 +31,7 @@ import {HeaderTagManager} from './shared/header-tag-manager';
 export class MaterialDocsApp implements OnDestroy {
   private _subscriptions = new Subscription();
   private _headerTagManager = inject(HeaderTagManager);
+  private _document = inject(DOCUMENT);
 
   constructor() {
     const analytics = inject(AnalyticsService);
@@ -48,7 +49,7 @@ export class MaterialDocsApp implements OnDestroy {
           // We want to reset the scroll position on navigation except when navigating within
           // the documentation for a single component.
           if (!navigationFocusService.isNavigationWithinComponentView(fromUrl, toUrl)) {
-            resetScrollPosition();
+            this._resetScrollPosition();
           }
           analytics.locationChanged(toUrl);
         }),
@@ -71,13 +72,13 @@ export class MaterialDocsApp implements OnDestroy {
   private _updateCanonicalLink(absoluteUrl: string) {
     this._headerTagManager.setCanonical(absoluteUrl);
   }
-}
 
-function resetScrollPosition() {
-  if (typeof document === 'object' && document) {
-    const sidenavContent = document.querySelector('.mat-drawer-content');
-    if (sidenavContent) {
-      sidenavContent.scrollTop = 0;
+  private _resetScrollPosition() {
+    if (this._document) {
+      const sidenavContent = this._document.querySelector('.mat-drawer-content') as HTMLElement;
+      if (sidenavContent) {
+        sidenavContent.scrollTop = 0;
+      }
     }
   }
 }
