@@ -153,6 +153,36 @@ export class MatSelectChange<T = any> {
   ) {}
 }
 
+/** Configuration for the select. */
+export interface MatSelectConfig {
+  panelClass?: string | string[] | Set<string> | {[key: string]: any};
+  panelWidth?: string | number | null;
+  disableOptionCentering?: boolean;
+  hideSingleSelectionIndicator?: boolean;
+  disableRipple?: boolean;
+  typeaheadDebounceInterval?: number;
+  sortComparator?: (a: MatOption, b: MatOption, options: MatOption[]) => number;
+  canSelectNullableOptions?: boolean;
+}
+
+/** State properties for the select. */
+export interface MatSelectState {
+   id?: string;
+   placeholder?: string;
+   required?: boolean;
+   multiple?: boolean;
+   disabled?: boolean;
+   tabIndex?: number;
+   compareWith?: (o1: any, o2: any) => boolean;
+}
+
+/** Aria properties for the select. */
+export interface MatSelectAria {
+    label?: string;
+    labelledby?: string;
+    describedby?: string;
+}
+
 @Component({
   selector: 'mat-select',
   exportAs: 'matSelect',
@@ -338,7 +368,93 @@ export class MatSelect
    * Implemented as part of MatFormFieldControl.
    * @docs-private
    */
-  @Input('aria-describedby') userAriaDescribedBy: string;
+  /**
+   * Implemented as part of MatFormFieldControl.
+   * @docs-private
+   */
+  userAriaDescribedBy: string;
+
+  /**
+   * Configuration options.
+   */
+  @Input()
+  get config(): MatSelectConfig {
+    return {
+      panelClass: this.panelClass,
+      panelWidth: this.panelWidth,
+      disableOptionCentering: this.disableOptionCentering,
+      hideSingleSelectionIndicator: this.hideSingleSelectionIndicator,
+      disableRipple: this.disableRipple,
+      typeaheadDebounceInterval: this.typeaheadDebounceInterval,
+      sortComparator: this.sortComparator,
+      canSelectNullableOptions: this.canSelectNullableOptions
+    };
+  }
+  set config(c: MatSelectConfig) {
+      if (c.panelClass !== undefined) this.panelClass = c.panelClass;
+      if (c.panelWidth !== undefined) this.panelWidth = c.panelWidth;
+      if (c.disableOptionCentering !== undefined) this.disableOptionCentering = c.disableOptionCentering;
+      if (c.hideSingleSelectionIndicator !== undefined) {
+         this.hideSingleSelectionIndicator = c.hideSingleSelectionIndicator;
+         this._syncParentProperties();
+      }
+      if (c.disableRipple !== undefined) this.disableRipple = c.disableRipple;
+      if (c.typeaheadDebounceInterval !== undefined) {
+         this.typeaheadDebounceInterval = c.typeaheadDebounceInterval;
+         if (this._keyManager) {
+             this._keyManager.withTypeAhead(this.typeaheadDebounceInterval);
+         }
+      }
+      if (c.sortComparator !== undefined) this.sortComparator = c.sortComparator;
+      if (c.canSelectNullableOptions !== undefined) this.canSelectNullableOptions = c.canSelectNullableOptions;
+  }
+
+  /**
+   * State properties.
+   */
+  @Input()
+  get state(): MatSelectState {
+    return {
+       id: this.id,
+       placeholder: this.placeholder,
+       required: this.required,
+       multiple: this.multiple,
+       disabled: this.disabled,
+       tabIndex: this.tabIndex,
+       compareWith: this.compareWith
+    };
+  }
+  set state(s: MatSelectState) {
+      // Order matters if side effects depend on other props.
+      if (s.id !== undefined) this.id = s.id;
+      if (s.placeholder !== undefined) this.placeholder = s.placeholder;
+      if (s.required !== undefined) this.required = s.required;
+      // multiple throws error if selectionModel exists? managed in setter
+      if (s.multiple !== undefined) this.multiple = s.multiple;
+      if (s.disabled !== undefined) this.disabled = s.disabled;
+      if (s.tabIndex !== undefined) this.tabIndex = s.tabIndex;
+      if (s.compareWith !== undefined) this.compareWith = s.compareWith;
+  }
+
+  /**
+   * Aria properties.
+   */
+  @Input()
+  get aria(): MatSelectAria {
+      return {
+          label: this.ariaLabel,
+          labelledby: this.ariaLabelledby,
+          describedby: this.userAriaDescribedBy
+      };
+  }
+  set aria(a: MatSelectAria) {
+      if (a.label !== undefined) this.ariaLabel = a.label;
+      if (a.labelledby !== undefined) this.ariaLabelledby = a.labelledby;
+      if (a.describedby !== undefined) {
+          this.userAriaDescribedBy = a.describedby;
+          this.stateChanges.next();
+      }
+  }
 
   /** Deals with the selection logic. */
   _selectionModel: SelectionModel<MatOption>;
@@ -386,14 +502,13 @@ export class MatSelect
   protected _overlayDir: CdkConnectedOverlay;
 
   /** Classes to be passed to the select panel. Supports the same syntax as `ngClass`. */
-  @Input() panelClass: string | string[] | Set<string> | {[key: string]: any};
+  panelClass: string | string[] | Set<string> | {[key: string]: any};
 
   /** Whether the select is disabled. */
   @Input({transform: booleanAttribute})
   disabled: boolean = false;
 
   /** Whether ripples in the select are disabled. */
-  @Input({transform: booleanAttribute})
   get disableRipple() {
     return this._disableRipple();
   }
@@ -403,13 +518,9 @@ export class MatSelect
   private _disableRipple = signal(false);
 
   /** Tab index of the select. */
-  @Input({
-    transform: (value: unknown) => (value == null ? 0 : numberAttribute(value)),
-  })
   tabIndex: number = 0;
 
   /** Whether checkmark indicator for single-selection options is hidden. */
-  @Input({transform: booleanAttribute})
   get hideSingleSelectionIndicator(): boolean {
     return this._hideSingleSelectionIndicator;
   }
@@ -421,7 +532,6 @@ export class MatSelect
     this._defaultOptions?.hideSingleSelectionIndicator ?? false;
 
   /** Placeholder to be shown if no value has been selected. */
-  @Input()
   get placeholder(): string {
     return this._placeholder;
   }
@@ -432,7 +542,6 @@ export class MatSelect
   private _placeholder: string;
 
   /** Whether the component is required. */
-  @Input({transform: booleanAttribute})
   get required(): boolean {
     return this._required ?? this.ngControl?.control?.hasValidator(Validators.required) ?? false;
   }
@@ -443,7 +552,6 @@ export class MatSelect
   private _required: boolean | undefined;
 
   /** Whether the user should be allowed to select multiple options. */
-  @Input({transform: booleanAttribute})
   get multiple(): boolean {
     return this._multiple;
   }
@@ -457,7 +565,6 @@ export class MatSelect
   private _multiple: boolean = false;
 
   /** Whether to center the active option over the trigger. */
-  @Input({transform: booleanAttribute})
   disableOptionCentering = this._defaultOptions?.disableOptionCentering ?? false;
 
   /**
@@ -465,7 +572,6 @@ export class MatSelect
    * is a value from an option. The second is a value from the selection. A boolean
    * should be returned.
    */
-  @Input()
   get compareWith() {
     return this._compareWith;
   }
@@ -495,10 +601,10 @@ export class MatSelect
   private _value: any;
 
   /** Aria label of the select. */
-  @Input('aria-label') ariaLabel: string = '';
+  ariaLabel: string = '';
 
   /** Input that can be used to specify the `aria-labelledby` attribute. */
-  @Input('aria-labelledby') ariaLabelledby: string;
+  ariaLabelledby: string;
 
   /** Object used to control when error messages are shown. */
   @Input()
@@ -510,17 +616,15 @@ export class MatSelect
   }
 
   /** Time to wait in milliseconds after the last keystroke before moving focus to an item. */
-  @Input({transform: numberAttribute})
   typeaheadDebounceInterval: number;
 
   /**
    * Function used to sort the values in a select in multiple mode.
    * Follows the same logic as `Array.prototype.sort`.
    */
-  @Input() sortComparator: (a: MatOption, b: MatOption, options: MatOption[]) => number;
+  sortComparator: (a: MatOption, b: MatOption, options: MatOption[]) => number;
 
   /** Unique id of the element. */
-  @Input()
   get id(): string {
     return this._id;
   }
@@ -542,7 +646,7 @@ export class MatSelect
    * Width of the panel. If set to `auto`, the panel will match the trigger width.
    * If set to null or an empty string, the panel will grow to match the longest option's text.
    */
-  @Input() panelWidth: string | number | null =
+  panelWidth: string | number | null =
     this._defaultOptions && typeof this._defaultOptions.panelWidth !== 'undefined'
       ? this._defaultOptions.panelWidth
       : 'auto';
@@ -553,7 +657,6 @@ export class MatSelect
    * the nullable options should become selected. The value of this input can be controlled app-wide
    * using the `MAT_SELECT_CONFIG` injection token.
    */
-  @Input({transform: booleanAttribute})
   canSelectNullableOptions: boolean = this._defaultOptions?.canSelectNullableOptions ?? false;
 
   /** Combined stream of all of the child options' change events. */
@@ -696,15 +799,7 @@ export class MatSelect
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    // Updating the disabled state is handled by the input, but we need to additionally let
-    // the parent form field know to run change detection when the disabled state changes.
-    if (changes['disabled'] || changes['userAriaDescribedBy']) {
-      this.stateChanges.next();
-    }
-
-    if (changes['typeaheadDebounceInterval'] && this._keyManager) {
-      this._keyManager.withTypeAhead(this.typeaheadDebounceInterval);
-    }
+     // Updating the disabled state etc is now handled by the config/state setters
   }
 
   ngOnDestroy() {
