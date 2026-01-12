@@ -167,7 +167,7 @@ export class MatTabGroup
       fitInkBarToContent: this.fitInkBarToContent,
       stretchTabs: this.stretchTabs,
       alignTabs: this.alignTabs,
-      disableRipple: this.disableRipple
+      disableRipple: this.disableRipple,
     };
   }
   set appearance(a: MatTabGroupAppearance) {
@@ -190,7 +190,7 @@ export class MatTabGroup
       animationDuration: this.animationDuration,
       contentTabIndex: this.contentTabIndex,
       disablePagination: this.disablePagination,
-      preserveContent: this.preserveContent
+      preserveContent: this.preserveContent,
     };
   }
   set config(c: MatTabGroupBehavior) {
@@ -208,7 +208,7 @@ export class MatTabGroup
   get aria(): MatTabGroupAria {
     return {
       label: this.ariaLabel,
-      labelledby: this.ariaLabelledby
+      labelledby: this.ariaLabelledby,
     };
   }
   set aria(a: MatTabGroupAria) {

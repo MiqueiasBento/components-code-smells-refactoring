@@ -9,33 +9,32 @@
 // Workaround for: https://github.com/bazelbuild/rules_nodejs/issues/1265
 /// <reference types="youtube" preserve="true" />
 
+import {isPlatformBrowser} from '@angular/common';
 import {
+  AfterViewInit,
+  CSP_NONCE,
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
+  EventEmitter,
+  InjectionToken,
   Input,
   NgZone,
+  OnChanges,
   OnDestroy,
   Output,
+  PLATFORM_ID,
+  SimpleChanges,
   ViewChild,
   ViewEncapsulation,
-  PLATFORM_ID,
-  OnChanges,
-  SimpleChanges,
-  booleanAttribute,
-  numberAttribute,
-  InjectionToken,
   inject,
-  CSP_NONCE,
-  ChangeDetectorRef,
-  AfterViewInit,
-  EventEmitter,
+  numberAttribute,
 } from '@angular/core';
-import {isPlatformBrowser} from '@angular/common';
+import {BehaviorSubject, Observable, Subject, fromEventPattern, of as observableOf} from 'rxjs';
+import {switchMap, takeUntil} from 'rxjs/operators';
 import {trustedResourceUrl} from 'safevalues';
 import {setScriptSrc} from 'safevalues/dom';
-import {Observable, of as observableOf, Subject, BehaviorSubject, fromEventPattern} from 'rxjs';
-import {takeUntil, switchMap} from 'rxjs/operators';
 import {PlaceholderImageQuality, YouTubePlayerPlaceholder} from './youtube-player-placeholder';
 
 declare global {
@@ -70,7 +69,7 @@ export interface YouTubePlayerConfig {
    * because not all video have a high-quality placeholder.
    */
   placeholderImageQuality?: PlaceholderImageQuality;
-  
+
   /** Whether cookies inside the player have been disabled. */
   disableCookies?: boolean;
 
@@ -180,7 +179,7 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
       startSeconds: this.startSeconds,
       endSeconds: this.endSeconds,
       suggestedQuality: this.suggestedQuality,
-      playerVars: this.playerVars
+      playerVars: this.playerVars,
     };
   }
   set videoOptions(o: YouTubePlayerVideoOptions) {
@@ -189,12 +188,12 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
     let qual = false;
 
     if (o.videoId !== undefined && o.videoId !== this.videoId) {
-       this.videoId = o.videoId;
-       recreate = true;
+      this.videoId = o.videoId;
+      recreate = true;
     }
     if (o.playerVars !== undefined && this._diffPlayerVars(o.playerVars, this.playerVars)) {
-       this.playerVars = o.playerVars;
-       recreate = true;
+      this.playerVars = o.playerVars;
+      recreate = true;
     }
     if (o.startSeconds !== undefined) {
       this.startSeconds = o.startSeconds;
@@ -211,11 +210,11 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     if (this._player) {
-       if (recreate) this._conditionallyLoad();
-       else {
-         if (qual) this._setQuality();
-         if (cue) this._cuePlayer();
-       }
+      if (recreate) this._conditionallyLoad();
+      else {
+        if (qual) this._setQuality();
+        if (cue) this._cuePlayer();
+      }
     }
   }
 
@@ -224,21 +223,21 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
    */
   @Input()
   get dimensions(): YouTubePlayerDimensions {
-     return { height: this.height, width: this.width };
+    return {height: this.height, width: this.width};
   }
   set dimensions(d: YouTubePlayerDimensions) {
-     let changed = false;
-     if (d.height !== undefined && d.height !== this.height) {
-        this.height = d.height;
-        changed = true;
-     }
-     if (d.width !== undefined && d.width !== this.width) {
-        this.width = d.width;
-        changed = true;
-     }
-     if (changed && this._player) {
-        this._setSize();
-     }
+    let changed = false;
+    if (d.height !== undefined && d.height !== this.height) {
+      this.height = d.height;
+      changed = true;
+    }
+    if (d.width !== undefined && d.width !== this.width) {
+      this.width = d.width;
+      changed = true;
+    }
+    if (changed && this._player) {
+      this._setSize();
+    }
   }
 
   /**
@@ -252,22 +251,25 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
       showBeforeIframeApiLoads: this.showBeforeIframeApiLoads,
       placeholderButtonLabel: this.placeholderButtonLabel,
       placeholderImageQuality: this.placeholderImageQuality,
-      disableCookies: this.disableCookies
+      disableCookies: this.disableCookies,
     };
   }
   set config(c: YouTubePlayerConfig) {
     let recreate = false;
     if (c.loadApi !== undefined) this.loadApi = c.loadApi;
     if (c.disablePlaceholder !== undefined && c.disablePlaceholder !== this.disablePlaceholder) {
-       this.disablePlaceholder = c.disablePlaceholder;
-       recreate = true;
+      this.disablePlaceholder = c.disablePlaceholder;
+      recreate = true;
     }
-    if (c.showBeforeIframeApiLoads !== undefined) this.showBeforeIframeApiLoads = c.showBeforeIframeApiLoads;
-    if (c.placeholderButtonLabel !== undefined) this.placeholderButtonLabel = c.placeholderButtonLabel;
-    if (c.placeholderImageQuality !== undefined) this.placeholderImageQuality = c.placeholderImageQuality;
+    if (c.showBeforeIframeApiLoads !== undefined)
+      this.showBeforeIframeApiLoads = c.showBeforeIframeApiLoads;
+    if (c.placeholderButtonLabel !== undefined)
+      this.placeholderButtonLabel = c.placeholderButtonLabel;
+    if (c.placeholderImageQuality !== undefined)
+      this.placeholderImageQuality = c.placeholderImageQuality;
     if (c.disableCookies !== undefined && c.disableCookies !== this.disableCookies) {
-       this.disableCookies = c.disableCookies;
-       recreate = true;
+      this.disableCookies = c.disableCookies;
+      recreate = true;
     }
 
     if (recreate && this._player) {
@@ -386,7 +388,7 @@ export class YouTubePlayer implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-     // Handling moved to config/dimensions/videoOptions setters
+    // Handling moved to config/dimensions/videoOptions setters
   }
 
   private _diffPlayerVars(a: YT.PlayerVars | undefined, b: YT.PlayerVars | undefined): boolean {

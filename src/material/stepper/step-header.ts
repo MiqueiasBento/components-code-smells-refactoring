@@ -78,7 +78,7 @@ export class MatStepHeader extends CdkStepHeader implements AfterViewInit, OnDes
       index: this.index,
       optional: this.optional,
       disableRipple: this.disableRipple,
-      color: this.color
+      color: this.color,
     };
   }
   set config(c: MatStepHeaderConfig) {
@@ -99,7 +99,7 @@ export class MatStepHeader extends CdkStepHeader implements AfterViewInit, OnDes
     return {
       state: this.state,
       selected: this.selected,
-      active: this.active
+      active: this.active,
     };
   }
   set headerState(s: MatStepHeaderState) {

@@ -167,20 +167,20 @@ export interface MatSelectConfig {
 
 /** State properties for the select. */
 export interface MatSelectState {
-   id?: string;
-   placeholder?: string;
-   required?: boolean;
-   multiple?: boolean;
-   disabled?: boolean;
-   tabIndex?: number;
-   compareWith?: (o1: any, o2: any) => boolean;
+  id?: string;
+  placeholder?: string;
+  required?: boolean;
+  multiple?: boolean;
+  disabled?: boolean;
+  tabIndex?: number;
+  compareWith?: (o1: any, o2: any) => boolean;
 }
 
 /** Aria properties for the select. */
 export interface MatSelectAria {
-    label?: string;
-    labelledby?: string;
-    describedby?: string;
+  label?: string;
+  labelledby?: string;
+  describedby?: string;
 }
 
 @Component({
@@ -387,26 +387,28 @@ export class MatSelect
       disableRipple: this.disableRipple,
       typeaheadDebounceInterval: this.typeaheadDebounceInterval,
       sortComparator: this.sortComparator,
-      canSelectNullableOptions: this.canSelectNullableOptions
+      canSelectNullableOptions: this.canSelectNullableOptions,
     };
   }
   set config(c: MatSelectConfig) {
-      if (c.panelClass !== undefined) this.panelClass = c.panelClass;
-      if (c.panelWidth !== undefined) this.panelWidth = c.panelWidth;
-      if (c.disableOptionCentering !== undefined) this.disableOptionCentering = c.disableOptionCentering;
-      if (c.hideSingleSelectionIndicator !== undefined) {
-         this.hideSingleSelectionIndicator = c.hideSingleSelectionIndicator;
-         this._syncParentProperties();
+    if (c.panelClass !== undefined) this.panelClass = c.panelClass;
+    if (c.panelWidth !== undefined) this.panelWidth = c.panelWidth;
+    if (c.disableOptionCentering !== undefined)
+      this.disableOptionCentering = c.disableOptionCentering;
+    if (c.hideSingleSelectionIndicator !== undefined) {
+      this.hideSingleSelectionIndicator = c.hideSingleSelectionIndicator;
+      this._syncParentProperties();
+    }
+    if (c.disableRipple !== undefined) this.disableRipple = c.disableRipple;
+    if (c.typeaheadDebounceInterval !== undefined) {
+      this.typeaheadDebounceInterval = c.typeaheadDebounceInterval;
+      if (this._keyManager) {
+        this._keyManager.withTypeAhead(this.typeaheadDebounceInterval);
       }
-      if (c.disableRipple !== undefined) this.disableRipple = c.disableRipple;
-      if (c.typeaheadDebounceInterval !== undefined) {
-         this.typeaheadDebounceInterval = c.typeaheadDebounceInterval;
-         if (this._keyManager) {
-             this._keyManager.withTypeAhead(this.typeaheadDebounceInterval);
-         }
-      }
-      if (c.sortComparator !== undefined) this.sortComparator = c.sortComparator;
-      if (c.canSelectNullableOptions !== undefined) this.canSelectNullableOptions = c.canSelectNullableOptions;
+    }
+    if (c.sortComparator !== undefined) this.sortComparator = c.sortComparator;
+    if (c.canSelectNullableOptions !== undefined)
+      this.canSelectNullableOptions = c.canSelectNullableOptions;
   }
 
   /**
@@ -415,25 +417,25 @@ export class MatSelect
   @Input()
   get state(): MatSelectState {
     return {
-       id: this.id,
-       placeholder: this.placeholder,
-       required: this.required,
-       multiple: this.multiple,
-       disabled: this.disabled,
-       tabIndex: this.tabIndex,
-       compareWith: this.compareWith
+      id: this.id,
+      placeholder: this.placeholder,
+      required: this.required,
+      multiple: this.multiple,
+      disabled: this.disabled,
+      tabIndex: this.tabIndex,
+      compareWith: this.compareWith,
     };
   }
   set state(s: MatSelectState) {
-      // Order matters if side effects depend on other props.
-      if (s.id !== undefined) this.id = s.id;
-      if (s.placeholder !== undefined) this.placeholder = s.placeholder;
-      if (s.required !== undefined) this.required = s.required;
-      // multiple throws error if selectionModel exists? managed in setter
-      if (s.multiple !== undefined) this.multiple = s.multiple;
-      if (s.disabled !== undefined) this.disabled = s.disabled;
-      if (s.tabIndex !== undefined) this.tabIndex = s.tabIndex;
-      if (s.compareWith !== undefined) this.compareWith = s.compareWith;
+    // Order matters if side effects depend on other props.
+    if (s.id !== undefined) this.id = s.id;
+    if (s.placeholder !== undefined) this.placeholder = s.placeholder;
+    if (s.required !== undefined) this.required = s.required;
+    // multiple throws error if selectionModel exists? managed in setter
+    if (s.multiple !== undefined) this.multiple = s.multiple;
+    if (s.disabled !== undefined) this.disabled = s.disabled;
+    if (s.tabIndex !== undefined) this.tabIndex = s.tabIndex;
+    if (s.compareWith !== undefined) this.compareWith = s.compareWith;
   }
 
   /**
@@ -441,19 +443,19 @@ export class MatSelect
    */
   @Input()
   get aria(): MatSelectAria {
-      return {
-          label: this.ariaLabel,
-          labelledby: this.ariaLabelledby,
-          describedby: this.userAriaDescribedBy
-      };
+    return {
+      label: this.ariaLabel,
+      labelledby: this.ariaLabelledby,
+      describedby: this.userAriaDescribedBy,
+    };
   }
   set aria(a: MatSelectAria) {
-      if (a.label !== undefined) this.ariaLabel = a.label;
-      if (a.labelledby !== undefined) this.ariaLabelledby = a.labelledby;
-      if (a.describedby !== undefined) {
-          this.userAriaDescribedBy = a.describedby;
-          this.stateChanges.next();
-      }
+    if (a.label !== undefined) this.ariaLabel = a.label;
+    if (a.labelledby !== undefined) this.ariaLabelledby = a.labelledby;
+    if (a.describedby !== undefined) {
+      this.userAriaDescribedBy = a.describedby;
+      this.stateChanges.next();
+    }
   }
 
   /** Deals with the selection logic. */
@@ -799,7 +801,7 @@ export class MatSelect
   }
 
   ngOnChanges(changes: SimpleChanges) {
-     // Updating the disabled state etc is now handled by the config/state setters
+    // Updating the disabled state etc is now handled by the config/state setters
   }
 
   ngOnDestroy() {
