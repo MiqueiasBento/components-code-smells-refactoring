@@ -55,8 +55,8 @@ export function createComponent<T>(
  * @param x Position along the x axis to which to drag the element.
  * @param y Position along the y axis to which to drag the element.
  */
-export function dragElementViaMouse(
-  fixture: ComponentFixture<any>,
+export function dragElementViaMouse<T>(
+  fixture: ComponentFixture<T>,
   element: Element,
   x: number,
   y: number,
@@ -77,8 +77,8 @@ export function dragElementViaMouse(
  * @param x Position along the x axis to which to drag the element.
  * @param y Position along the y axis to which to drag the element.
  */
-export function startDraggingViaMouse(
-  fixture: ComponentFixture<any>,
+export function startDraggingViaMouse<T>(
+  fixture: ComponentFixture<T>,
   element: Element,
   x?: number,
   y?: number,
@@ -97,8 +97,8 @@ export function startDraggingViaMouse(
  * @param x Position along the x axis to which to drag the element.
  * @param y Position along the y axis to which to drag the element.
  */
-export function dragElementViaTouch(
-  fixture: ComponentFixture<any>,
+export function dragElementViaTouch<T>(
+  fixture: ComponentFixture<T>,
   element: Element,
   x: number,
   y: number,
@@ -112,7 +112,7 @@ export function dragElementViaTouch(
  * @param fixture Fixture on which to run change detection.
  * @param element Element which is being dragged.
  */
-export function startDraggingViaTouch(fixture: ComponentFixture<any>, element: Element) {
+export function startDraggingViaTouch<T>(fixture: ComponentFixture<T>, element: Element) {
   dispatchTouchEvent(element, 'touchstart');
   fixture.detectChanges();
 
@@ -125,7 +125,7 @@ export function startDraggingViaTouch(fixture: ComponentFixture<any>, element: E
  * @param x Position along the x axis to which to drag the element.
  * @param y Position along the y axis to which to drag the element.
  */
-export function continueDraggingViaTouch(fixture: ComponentFixture<any>, x: number, y: number) {
+export function continueDraggingViaTouch<T>(fixture: ComponentFixture<T>, x: number, y: number) {
   dispatchTouchEvent(document, 'touchmove', x, y);
   fixture.detectChanges();
 }
@@ -135,7 +135,7 @@ export function continueDraggingViaTouch(fixture: ComponentFixture<any>, x: numb
  * @param x Position along the x axis to which to drag the element.
  * @param y Position along the y axis to which to drag the element.
  */
-export function stopDraggingViaTouch(fixture: ComponentFixture<any>, x: number, y: number) {
+export function stopDraggingViaTouch<T>(fixture: ComponentFixture<T>, x: number, y: number) {
   dispatchTouchEvent(document, 'touchend', x, y);
   fixture.detectChanges();
 }
