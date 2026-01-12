@@ -1429,11 +1429,11 @@ class ComponentWithChildViewContainer {
 })
 class ComponentWithTemplateRef {
   localValue: string;
-  dialogRef: DialogRef<any>;
+  dialogRef: DialogRef<unknown, unknown>;
 
-  @ViewChild(TemplateRef) templateRef: TemplateRef<any>;
+  @ViewChild(TemplateRef) templateRef: TemplateRef<unknown>;
 
-  setDialogRef(dialogRef: DialogRef<any>): string {
+  setDialogRef(dialogRef: DialogRef<unknown, unknown>): string {
     this.dialogRef = dialogRef;
     return '';
   }
@@ -1521,6 +1521,6 @@ class TemplateInjectorInnerDirective {
   imports: [TemplateInjectorInnerDirective],
 })
 class TemplateInjectorParentComponent {
-  @ViewChild(TemplateRef) templateRef: TemplateRef<any>;
+  @ViewChild(TemplateRef) templateRef: TemplateRef<unknown>;
   innerComponentValue = '';
 }

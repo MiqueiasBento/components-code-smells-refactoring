@@ -60,19 +60,19 @@ export class Dialog implements OnDestroy {
   private _overlayContainer = inject(OverlayContainer);
   private _idGenerator = inject(_IdGenerator);
 
-  private _openDialogsAtThisLevel: DialogRef<any, any>[] = [];
+  private _openDialogsAtThisLevel: DialogRef<unknown, unknown>[] = [];
   private readonly _afterAllClosedAtThisLevel = new Subject<void>();
-  private readonly _afterOpenedAtThisLevel = new Subject<DialogRef>();
+  private readonly _afterOpenedAtThisLevel = new Subject<DialogRef<unknown, unknown>>();
   private _ariaHiddenElements = new Map<Element, string | null>();
   private _scrollStrategy = inject(DIALOG_SCROLL_STRATEGY);
 
   /** Keeps track of the currently-open dialogs. */
-  get openDialogs(): readonly DialogRef<any, any>[] {
+  get openDialogs(): readonly DialogRef<unknown, unknown>[] {
     return this._parentDialog ? this._parentDialog.openDialogs : this._openDialogsAtThisLevel;
   }
 
   /** Stream that emits when a dialog has been opened. */
-  get afterOpened(): Subject<DialogRef<any, any>> {
+  get afterOpened(): Subject<DialogRef<unknown, unknown>> {
     return this._parentDialog ? this._parentDialog.afterOpened : this._afterOpenedAtThisLevel;
   }
 
@@ -289,7 +289,10 @@ export class Dialog implements OnDestroy {
   ) {
     if (componentOrTemplateRef instanceof TemplateRef) {
       const injector = this._createInjector(config, dialogRef, dialogContainer, undefined);
-      let context: any = {$implicit: config.data, dialogRef};
+      let context: Record<string, unknown> & {$implicit: D; dialogRef: DialogRef<R, C>} = {
+        $implicit: config.data,
+        dialogRef,
+      };
 
       if (config.templateContext) {
         context = {

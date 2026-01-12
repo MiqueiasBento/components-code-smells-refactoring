@@ -36,23 +36,19 @@ describe('FocusMonitor', () => {
           provide: DOCUMENT,
           useFactory: () => {
             // We have to stub out the `document` in order to be able to fake `activeElement`.
-            const fakeDocument = {body: document.body};
-            [
-              'createElement',
-              'dispatchEvent',
-              'querySelectorAll',
-              'addEventListener',
-              'removeEventListener',
-              'querySelector',
-              'createTextNode',
-            ].forEach(method => {
-              (fakeDocument as any)[method] = function () {
-                return (document as any)[method].apply(document, arguments);
-              };
-            });
-            Object.defineProperty(fakeDocument, 'activeElement', {
-              get: () => fakeActiveElement || document.activeElement,
-            });
+            const fakeDocument = {
+              body: document.body,
+              createElement: document.createElement.bind(document),
+              dispatchEvent: document.dispatchEvent.bind(document),
+              querySelectorAll: document.querySelectorAll.bind(document),
+              addEventListener: document.addEventListener.bind(document),
+              removeEventListener: document.removeEventListener.bind(document),
+              querySelector: document.querySelector.bind(document),
+              createTextNode: document.createTextNode.bind(document),
+              get activeElement() {
+                return fakeActiveElement || document.activeElement;
+              },
+            } as Document;
             return fakeDocument;
           },
         },
@@ -281,7 +277,7 @@ describe('FocusMonitor', () => {
 
     // Call `blur` directly because invoking `buttonElement.blur()` does not always trigger the
     // handler on IE11 on SauceLabs.
-    focusMonitor._onBlur({} as any, buttonElement);
+    focusMonitor._onBlur(new FocusEvent('blur'), buttonElement);
     fixture.detectChanges();
 
     expect(buttonElement.classList.length)

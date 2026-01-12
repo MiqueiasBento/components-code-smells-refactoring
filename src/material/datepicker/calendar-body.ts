@@ -66,6 +66,33 @@ export interface MatCalendarUserEvent<D> {
   event: Event;
 }
 
+/** Configuration for the calendar grid. */
+export interface MatCalendarGridConfig {
+  rows?: MatCalendarCell[][];
+  numCols?: number;
+  cellAspectRatio?: number;
+  labelMinRequiredCells?: number;
+  label?: string;
+  todayValue?: number;
+}
+
+/** Configuration for the calendar range. */
+export interface MatCalendarRangeConfiguration {
+   startValue?: number;
+   endValue?: number;
+   comparisonStart?: number | null;
+   comparisonEnd?: number | null;
+   previewStart?: number | null;
+   previewEnd?: number | null;
+   isRange?: boolean;
+}
+
+/** Configuration for calendar accessibility specs. */
+export interface MatCalendarAccessibilityConfig {
+    startDateAccessibleName?: string | null;
+    endDateAccessibleName?: string | null;
+}
+
 /** Event options that can be used to bind an active, capturing event. */
 const activeCapturingEventOptions = {
   passive: false,
@@ -115,26 +142,81 @@ export class MatCalendarBody<D = any> implements OnChanges, OnDestroy, AfterView
    */
   private _focusActiveCellAfterViewChecked = false;
 
+  @Input()
+  get config(): MatCalendarGridConfig {
+    return {
+      rows: this.rows,
+      numCols: this.numCols,
+      cellAspectRatio: this.cellAspectRatio,
+      labelMinRequiredCells: this.labelMinRequiredCells,
+      label: this.label,
+      todayValue: this.todayValue
+    };
+  }
+  set config(c: MatCalendarGridConfig) {
+     if (c.rows !== undefined) this.rows = c.rows;
+     if (c.numCols !== undefined) this.numCols = c.numCols;
+     if (c.cellAspectRatio !== undefined) this.cellAspectRatio = c.cellAspectRatio;
+     if (c.labelMinRequiredCells !== undefined) this.labelMinRequiredCells = c.labelMinRequiredCells;
+     if (c.label !== undefined) this.label = c.label;
+     if (c.todayValue !== undefined) this.todayValue = c.todayValue;
+     this._updateLayout();
+  }
+
+  @Input()
+  get rangeConfig(): MatCalendarRangeConfiguration {
+    return {
+       startValue: this.startValue,
+       endValue: this.endValue,
+       comparisonStart: this.comparisonStart,
+       comparisonEnd: this.comparisonEnd,
+       previewStart: this.previewStart,
+       previewEnd: this.previewEnd,
+       isRange: this.isRange
+    };
+  }
+  set rangeConfig(c: MatCalendarRangeConfiguration) {
+      if (c.startValue !== undefined) this.startValue = c.startValue;
+      if (c.endValue !== undefined) this.endValue = c.endValue;
+      if (c.comparisonStart !== undefined) this.comparisonStart = c.comparisonStart;
+      if (c.comparisonEnd !== undefined) this.comparisonEnd = c.comparisonEnd;
+      if (c.previewStart !== undefined) this.previewStart = c.previewStart;
+      if (c.previewEnd !== undefined) this.previewEnd = c.previewEnd;
+      if (c.isRange !== undefined) this.isRange = c.isRange;
+  }
+
+  @Input()
+  get accessibilityConfig(): MatCalendarAccessibilityConfig {
+    return {
+        startDateAccessibleName: this.startDateAccessibleName,
+        endDateAccessibleName: this.endDateAccessibleName
+    };
+  }
+  set accessibilityConfig(c: MatCalendarAccessibilityConfig) {
+      if (c.startDateAccessibleName !== undefined) this.startDateAccessibleName = c.startDateAccessibleName;
+      if (c.endDateAccessibleName !== undefined) this.endDateAccessibleName = c.endDateAccessibleName;
+  }
+
   /** The label for the table. (e.g. "Jan 2017"). */
-  @Input() label: string;
+  label: string;
 
   /** The cells to display in the table. */
-  @Input() rows: MatCalendarCell[][];
+  rows: MatCalendarCell[][];
 
   /** The value in the table that corresponds to today. */
-  @Input() todayValue: number;
+  todayValue: number;
 
   /** Start value of the selected date range. */
-  @Input() startValue: number;
+  startValue: number;
 
   /** End value of the selected date range. */
-  @Input() endValue: number;
+  endValue: number;
 
   /** The minimum number of free cells needed to fit the label in the first row. */
-  @Input() labelMinRequiredCells: number;
+  labelMinRequiredCells: number;
 
   /** The number of columns in the table. */
-  @Input() numCols: number = 7;
+  numCols: number = 7;
 
   /** The cell number of the active cell in the table. */
   @Input() activeCell: number = 0;
@@ -147,31 +229,31 @@ export class MatCalendarBody<D = any> implements OnChanges, OnDestroy, AfterView
   }
 
   /** Whether a range is being selected. */
-  @Input() isRange: boolean = false;
+  isRange: boolean = false;
 
   /**
    * The aspect ratio (width / height) to use for the cells in the table. This aspect ratio will be
    * maintained even as the table resizes.
    */
-  @Input() cellAspectRatio: number = 1;
+  cellAspectRatio: number = 1;
 
   /** Start of the comparison range. */
-  @Input() comparisonStart: number | null;
+  comparisonStart: number | null;
 
   /** End of the comparison range. */
-  @Input() comparisonEnd: number | null;
+  comparisonEnd: number | null;
 
   /** Start of the preview range. */
-  @Input() previewStart: number | null = null;
+  previewStart: number | null = null;
 
   /** End of the preview range. */
-  @Input() previewEnd: number | null = null;
+  previewEnd: number | null = null;
 
   /** ARIA Accessible name of the `<input matStartDate/>` */
-  @Input() startDateAccessibleName: string | null;
+  startDateAccessibleName: string | null;
 
   /** ARIA Accessible name of the `<input matEndDate/>` */
-  @Input() endDateAccessibleName: string | null;
+  endDateAccessibleName: string | null;
 
   /** Emits when a new value is selected. */
   @Output() readonly selectedValueChange = new EventEmitter<MatCalendarUserEvent<number>>();
@@ -284,20 +366,25 @@ export class MatCalendarBody<D = any> implements OnChanges, OnDestroy, AfterView
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    const columnChanges = changes['numCols'];
-    const {rows, numCols} = this;
+    // Logic moved to _updateLayout called by config setter
+    // We check if rows or numCols changed indirectly from the setter calls above
+  }
 
-    if (changes['rows'] || columnChanges) {
-      this._firstRowOffset = rows && rows.length && rows[0].length ? numCols - rows[0].length : 0;
+  private _updateLayout() {
+    if (this.rows && this.rows.length && this.rows[0].length) {
+      this._firstRowOffset = this.numCols - this.rows[0].length;
+    } else {
+      this._firstRowOffset = 0;
     }
 
-    if (changes['cellAspectRatio'] || columnChanges || !this._cellPadding) {
-      this._cellPadding = `${(50 * this.cellAspectRatio) / numCols}%`;
+    if (!this._cellPadding) {
+       this._cellPadding = `${(50 * this.cellAspectRatio) / this.numCols}%`;
     }
+    // Update padding always if ratio or cols changed? Original code checked changes.
+    // Simplifying to always update if we are here (config changed)
+    this._cellPadding = `${(50 * this.cellAspectRatio) / this.numCols}%`;
 
-    if (columnChanges || !this._cellWidth) {
-      this._cellWidth = `${100 / numCols}%`;
-    }
+    this._cellWidth = `${100 / this.numCols}%`;
   }
 
   ngOnDestroy() {

@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.dev/license
  */
 
-import {Injectable} from '@angular/core';
+import {Injectable, Renderer2, RendererFactory2, DOCUMENT, Inject} from '@angular/core';
 
 import {environment} from '../../../environments/environment';
 import {formatErrorEventForAnalytics} from './format-error';
@@ -34,8 +34,15 @@ declare global {
 @Injectable({providedIn: 'root'})
 export class AnalyticsService {
   private _previousUrl: string | undefined;
+  private _renderer: Renderer2;
+  private _document: Document;
 
-  constructor() {
+  constructor(
+    rendererFactory: RendererFactory2,
+    @Inject(DOCUMENT) document: Document,
+  ) {
+    this._renderer = rendererFactory.createRenderer(null, null);
+    this._document = document;
     this._installGlobalSiteTag();
     this._installWindowErrorHandler();
 
@@ -89,26 +96,28 @@ export class AnalyticsService {
     // instance with e.g. `callee` to be set. Do not attempt to change this and keep this
     // as much as possible in sync with the tracking code snippet suggested by the Google
     // Analytics 4 web UI under `Data Streams`.
-    window.dataLayer = window.dataLayer || [];
-    window.gtag = function () {
-      window.dataLayer?.push(arguments);
-    };
-    window.gtag('js', new Date());
+    if (typeof window !== 'undefined') {
+      window.dataLayer = window.dataLayer || [];
+      window.gtag = function () {
+        window.dataLayer?.push(arguments);
+      };
+      window.gtag('js', new Date());
 
-    // Configure properties before loading the script. This is necessary to avoid
-    // loading multiple instances of the gtag JS scripts.
-    window.gtag('config', environment.googleAnalyticsOverallDomainId);
-    window.gtag('config', environment.googleAnalyticsMaterialId);
+      // Configure properties before loading the script. This is necessary to avoid
+      // loading multiple instances of the gtag JS scripts.
+      window.gtag('config', environment.googleAnalyticsOverallDomainId);
+      window.gtag('config', environment.googleAnalyticsMaterialId);
 
-    // skip `gtag` for Protractor e2e tests.
-    if (window.name.includes('NG_DEFER_BOOTSTRAP')) {
-      return;
+      // skip `gtag` for Protractor e2e tests.
+      if (window.name.includes('NG_DEFER_BOOTSTRAP')) {
+        return;
+      }
+
+      const el = this._renderer.createElement('script');
+      this._renderer.setAttribute(el, 'async', 'true');
+      this._renderer.setAttribute(el, 'src', url);
+      this._renderer.appendChild(this._document.head, el);
     }
-
-    const el = window.document.createElement('script');
-    el.async = true;
-    el.src = url;
-    window.document.head.appendChild(el);
   }
 
   private _installWindowErrorHandler() {

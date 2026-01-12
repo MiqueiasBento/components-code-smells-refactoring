@@ -2,9 +2,9 @@ import {getMultipleValuesInSingleSelectionError, SelectionModel} from './selecti
 
 describe('SelectionModel', () => {
   describe('single selection', () => {
-    let model: SelectionModel<any>;
+    let model: SelectionModel<number>;
 
-    beforeEach(() => (model = new SelectionModel()));
+    beforeEach(() => (model = new SelectionModel<number>()));
 
     it('should be able to select a single value', () => {
       model.select(1);
@@ -26,7 +26,7 @@ describe('SelectionModel', () => {
     });
 
     it('should only preselect one value', () => {
-      model = new SelectionModel(false, [1, 2]);
+      model = new SelectionModel<number>(false, [1, 2]);
 
       expect(model.selected.length).toBe(1);
       expect(model.isSelected(1)).toBe(true);
@@ -35,9 +35,9 @@ describe('SelectionModel', () => {
   });
 
   describe('multiple selection', () => {
-    let model: SelectionModel<any>;
+    let model: SelectionModel<number>;
 
-    beforeEach(() => (model = new SelectionModel(true)));
+    beforeEach(() => (model = new SelectionModel<number>(true)));
 
     it('should be able to select multiple options', () => {
       const changedSpy = jasmine.createSpy('changed spy');
@@ -65,7 +65,7 @@ describe('SelectionModel', () => {
     });
 
     it('should be able to preselect multiple options', () => {
-      model = new SelectionModel(true, [1, 2]);
+      model = new SelectionModel<number>(true, [1, 2]);
 
       expect(model.selected.length).toBe(2);
       expect(model.isSelected(1)).toBe(true);
@@ -73,7 +73,7 @@ describe('SelectionModel', () => {
     });
 
     it('should be able to sort the selected values', () => {
-      model = new SelectionModel(true, [2, 3, 1]);
+      model = new SelectionModel<number>(true, [2, 3, 1]);
 
       expect(model.selected).toEqual([2, 3, 1]);
 
@@ -83,7 +83,7 @@ describe('SelectionModel', () => {
     });
 
     it('should sort values if `selected` has not been accessed before', () => {
-      model = new SelectionModel(true, [2, 3, 1]);
+      model = new SelectionModel<number>(true, [2, 3, 1]);
 
       // Important: don't assert `selected` before sorting so the getter isn't invoked
       model.sort();
@@ -93,7 +93,7 @@ describe('SelectionModel', () => {
 
   describe('changed event', () => {
     it('should return the model that dispatched the event', () => {
-      let model = new SelectionModel();
+      let model = new SelectionModel<number>();
       let spy = jasmine.createSpy('SelectionModel change event');
 
       model.changed.subscribe(spy);
@@ -106,7 +106,7 @@ describe('SelectionModel', () => {
     });
 
     it('should return both the added and removed values', () => {
-      let model = new SelectionModel();
+      let model = new SelectionModel<number>();
       let spy = jasmine.createSpy('SelectionModel change event');
 
       model.select(1);
@@ -123,7 +123,7 @@ describe('SelectionModel', () => {
     });
 
     it('should have updated the selected value before emitting the change event', () => {
-      let model = new SelectionModel(true);
+      let model = new SelectionModel<number>(true);
       let spy = jasmine.createSpy('SelectionModel change event');
 
       // Note: this assertion is only here to run the getter.
@@ -136,11 +136,11 @@ describe('SelectionModel', () => {
     });
 
     describe('selection', () => {
-      let model: SelectionModel<any>;
+      let model: SelectionModel<number>;
       let spy: jasmine.Spy;
 
       beforeEach(() => {
-        model = new SelectionModel(true);
+        model = new SelectionModel<number>(true);
         spy = jasmine.createSpy('SelectionModel change event');
 
         model.changed.subscribe(spy);
@@ -164,7 +164,7 @@ describe('SelectionModel', () => {
       });
 
       it('should not emit an event when preselecting values', () => {
-        model = new SelectionModel(false, [1]);
+        model = new SelectionModel<number>(false, [1]);
         spy = jasmine.createSpy('SelectionModel initial change event');
         model.changed.subscribe(spy);
 
@@ -173,11 +173,11 @@ describe('SelectionModel', () => {
     });
 
     describe('deselection', () => {
-      let model: SelectionModel<any>;
+      let model: SelectionModel<number>;
       let spy: jasmine.Spy;
 
       beforeEach(() => {
-        model = new SelectionModel(true, [1, 2, 3]);
+        model = new SelectionModel<number>(true, [1, 2, 3]);
         spy = jasmine.createSpy('SelectionModel change event');
 
         model.changed.subscribe(spy);
@@ -209,10 +209,10 @@ describe('SelectionModel', () => {
   });
 
   describe('disabling the change event', () => {
-    let model: SelectionModel<any>;
+    let model: SelectionModel<number>;
 
     beforeEach(() => {
-      model = new SelectionModel(true, undefined, false);
+      model = new SelectionModel<number>(true, undefined, false);
     });
 
     it('should still update the select value', () => {
@@ -225,7 +225,7 @@ describe('SelectionModel', () => {
   });
 
   it('should be able to determine whether it is empty', () => {
-    let model = new SelectionModel();
+    let model = new SelectionModel<number>();
 
     expect(model.isEmpty()).toBe(true);
 
@@ -235,7 +235,7 @@ describe('SelectionModel', () => {
   });
 
   it('should be able to determine whether it has a value', () => {
-    let model = new SelectionModel();
+    let model = new SelectionModel<number>();
 
     expect(model.hasValue()).toBe(false);
 
@@ -245,7 +245,7 @@ describe('SelectionModel', () => {
   });
 
   it('should be able to toggle an option', () => {
-    let model = new SelectionModel();
+    let model = new SelectionModel<number>();
 
     model.toggle(1);
     expect(model.isSelected(1)).toBe(true);
@@ -255,7 +255,7 @@ describe('SelectionModel', () => {
   });
 
   it('should be able to clear the selected options', () => {
-    let model = new SelectionModel(true);
+    let model = new SelectionModel<number>(true);
 
     model.select(1);
     model.select(2);
@@ -269,14 +269,14 @@ describe('SelectionModel', () => {
   });
 
   it('should be empty if an empty array is passed for the preselected values', () => {
-    expect(new SelectionModel(false, []).selected).toEqual([]);
+    expect(new SelectionModel<number>(false, []).selected).toEqual([]);
   });
 
   it('should be able to determine whether multiple values can be selected', () => {
-    let multipleSelectionModel = new SelectionModel(true);
+    let multipleSelectionModel = new SelectionModel<number>(true);
     expect(multipleSelectionModel.isMultipleSelection()).toBe(true);
 
-    let singleSelectionModel = new SelectionModel();
+    let singleSelectionModel = new SelectionModel<number>();
     expect(singleSelectionModel.isMultipleSelection()).toBe(false);
   });
 

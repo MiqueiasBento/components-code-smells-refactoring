@@ -23,6 +23,24 @@ import {MatStepLabel} from './step-label';
 import {MatStepperIntl} from './stepper-intl';
 import {MatStepperIconContext} from './stepper-icon';
 import {CdkStepHeader, StepState} from '@angular/cdk/stepper';
+
+/** Configuration options for the step header. */
+export interface MatStepHeaderConfig {
+  label?: MatStepLabel | string;
+  errorMessage?: string;
+  iconOverrides?: {[key: string]: TemplateRef<MatStepperIconContext>};
+  index?: number;
+  optional?: boolean;
+  disableRipple?: boolean;
+  color?: ThemePalette;
+}
+
+/** State properties for the step header. */
+export interface MatStepHeaderState {
+  state?: StepState;
+  selected?: boolean;
+  active?: boolean;
+}
 import {_StructuralStylesLoader, MatRipple, ThemePalette} from '../core';
 import {MatIcon} from '../icon';
 import {NgTemplateOutlet} from '@angular/common';
@@ -48,32 +66,74 @@ export class MatStepHeader extends CdkStepHeader implements AfterViewInit, OnDes
 
   private _intlSubscription: Subscription;
 
+  /**
+   * Configuration options.
+   */
+  @Input()
+  get config(): MatStepHeaderConfig {
+    return {
+      label: this.label,
+      errorMessage: this.errorMessage,
+      iconOverrides: this.iconOverrides,
+      index: this.index,
+      optional: this.optional,
+      disableRipple: this.disableRipple,
+      color: this.color
+    };
+  }
+  set config(c: MatStepHeaderConfig) {
+    if (c.label !== undefined) this.label = c.label;
+    if (c.errorMessage !== undefined) this.errorMessage = c.errorMessage;
+    if (c.iconOverrides !== undefined) this.iconOverrides = c.iconOverrides;
+    if (c.index !== undefined) this.index = c.index;
+    if (c.optional !== undefined) this.optional = c.optional;
+    if (c.disableRipple !== undefined) this.disableRipple = c.disableRipple;
+    if (c.color !== undefined) this.color = c.color;
+  }
+
+  /**
+   * State properties.
+   */
+  @Input()
+  get headerState(): MatStepHeaderState {
+    return {
+      state: this.state,
+      selected: this.selected,
+      active: this.active
+    };
+  }
+  set headerState(s: MatStepHeaderState) {
+    if (s.state !== undefined) this.state = s.state;
+    if (s.selected !== undefined) this.selected = s.selected;
+    if (s.active !== undefined) this.active = s.active;
+  }
+
   /** State of the given step. */
-  @Input() state: StepState;
+  state: StepState;
 
   /** Label of the given step. */
-  @Input() label: MatStepLabel | string;
+  label: MatStepLabel | string;
 
   /** Error message to display when there's an error. */
-  @Input() errorMessage: string;
+  errorMessage: string;
 
   /** Overrides for the header icons, passed in via the stepper. */
-  @Input() iconOverrides: {[key: string]: TemplateRef<MatStepperIconContext>};
+  iconOverrides: {[key: string]: TemplateRef<MatStepperIconContext>};
 
   /** Index of the given step. */
-  @Input() index: number;
+  index: number;
 
   /** Whether the given step is selected. */
-  @Input() selected: boolean;
+  selected: boolean;
 
   /** Whether the given step label is active. */
-  @Input() active: boolean;
+  active: boolean;
 
   /** Whether the given step is optional. */
-  @Input() optional: boolean;
+  optional: boolean;
 
   /** Whether the ripple should be disabled. */
-  @Input() disableRipple: boolean;
+  disableRipple: boolean;
 
   /**
    * Theme color of the step header. This API is supported in M2 themes only, it
@@ -82,7 +142,7 @@ export class MatStepHeader extends CdkStepHeader implements AfterViewInit, OnDes
    * For information on applying color variants in M3, see
    * https://material.angular.dev/guide/material-2-theming#optional-add-backwards-compatibility-styles-for-color-variants
    */
-  @Input() color: ThemePalette;
+  color: ThemePalette;
 
   constructor(...args: unknown[]);
 
