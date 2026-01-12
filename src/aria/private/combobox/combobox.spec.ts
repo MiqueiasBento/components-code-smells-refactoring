@@ -79,7 +79,9 @@ function _type(
   if (popup instanceof ComboboxListboxPattern) {
     (popup.inputs.items as WritableSignal<TestOption[]>).set(options as TestOption[]);
   } else if (popup instanceof ComboboxTreePattern) {
-    (popup.inputs.allItems as WritableSignal<TreeItemPattern<string>[]>).set(options as TreeItemPattern<string>[]);
+    (popup.inputs.allItems as WritableSignal<TreeItemPattern<string>[]>).set(
+      options as TreeItemPattern<string>[],
+    );
   }
   firstMatch.set(options[0]?.value());
   combobox.onFilter();
@@ -241,7 +243,9 @@ describe('Combobox with Listbox Pattern', () => {
       'Cranberry',
     ]);
 
-    (combobox.inputs.popupControls as WritableSignal<ComboboxListboxPattern<string> | undefined>).set(listbox);
+    (
+      combobox.inputs.popupControls as WritableSignal<ComboboxListboxPattern<string> | undefined>
+    ).set(listbox);
 
     return {
       combobox,
@@ -645,7 +649,9 @@ describe('Combobox with Tree Pattern', () => {
       {value: 'Grains', children: [{value: 'Rice'}, {value: 'Wheat'}]},
     ]);
 
-    (combobox.inputs.popupControls as WritableSignal<ComboboxTreePattern<string> | undefined>).set(tree);
+    (combobox.inputs.popupControls as WritableSignal<ComboboxTreePattern<string> | undefined>).set(
+      tree,
+    );
 
     return {
       combobox,

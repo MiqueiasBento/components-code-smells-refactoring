@@ -167,7 +167,7 @@ export class MatSlideToggle
       labelPosition: this.labelPosition,
       hideIcon: this.hideIcon,
       disableRipple: this.disableRipple,
-      disabledInteractive: this.disabledInteractive
+      disabledInteractive: this.disabledInteractive,
     };
   }
   set appearance(a: MatSlideToggleAppearance) {
@@ -190,15 +190,15 @@ export class MatSlideToggle
       tabIndex: this.tabIndex,
       ariaLabel: this.ariaLabel,
       ariaLabelledby: this.ariaLabelledby,
-      ariaDescribedby: this.ariaDescribedby
+      ariaDescribedby: this.ariaDescribedby,
     };
   }
   set config(c: MatSlideToggleConfig) {
     if (c.name !== undefined) this.name = c.name;
     if (c.id !== undefined) this.id = c.id;
     if (c.required !== undefined) {
-       this.required = c.required;
-       this._validatorOnChange();
+      this.required = c.required;
+      this._validatorOnChange();
     }
     if (c.tabIndex !== undefined) this.tabIndex = c.tabIndex;
     if (c.ariaLabel !== undefined) this.ariaLabel = c.ariaLabel;
@@ -213,7 +213,7 @@ export class MatSlideToggle
   get state(): MatSlideToggleState {
     return {
       checked: this.checked,
-      disabled: this.disabled
+      disabled: this.disabled,
     };
   }
   set state(s: MatSlideToggleState) {
@@ -331,7 +331,7 @@ export class MatSlideToggle
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-     // Managed in config setter
+    // Managed in config setter
   }
 
   ngOnDestroy() {
