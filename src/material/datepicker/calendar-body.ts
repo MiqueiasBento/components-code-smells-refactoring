@@ -78,19 +78,19 @@ export interface MatCalendarGridConfig {
 
 /** Configuration for the calendar range. */
 export interface MatCalendarRangeConfiguration {
-   startValue?: number;
-   endValue?: number;
-   comparisonStart?: number | null;
-   comparisonEnd?: number | null;
-   previewStart?: number | null;
-   previewEnd?: number | null;
-   isRange?: boolean;
+  startValue?: number;
+  endValue?: number;
+  comparisonStart?: number | null;
+  comparisonEnd?: number | null;
+  previewStart?: number | null;
+  previewEnd?: number | null;
+  isRange?: boolean;
 }
 
 /** Configuration for calendar accessibility specs. */
 export interface MatCalendarAccessibilityConfig {
-    startDateAccessibleName?: string | null;
-    endDateAccessibleName?: string | null;
+  startDateAccessibleName?: string | null;
+  endDateAccessibleName?: string | null;
 }
 
 /** Event options that can be used to bind an active, capturing event. */
@@ -150,51 +150,52 @@ export class MatCalendarBody<D = any> implements OnChanges, OnDestroy, AfterView
       cellAspectRatio: this.cellAspectRatio,
       labelMinRequiredCells: this.labelMinRequiredCells,
       label: this.label,
-      todayValue: this.todayValue
+      todayValue: this.todayValue,
     };
   }
   set config(c: MatCalendarGridConfig) {
-     if (c.rows !== undefined) this.rows = c.rows;
-     if (c.numCols !== undefined) this.numCols = c.numCols;
-     if (c.cellAspectRatio !== undefined) this.cellAspectRatio = c.cellAspectRatio;
-     if (c.labelMinRequiredCells !== undefined) this.labelMinRequiredCells = c.labelMinRequiredCells;
-     if (c.label !== undefined) this.label = c.label;
-     if (c.todayValue !== undefined) this.todayValue = c.todayValue;
-     this._updateLayout();
+    if (c.rows !== undefined) this.rows = c.rows;
+    if (c.numCols !== undefined) this.numCols = c.numCols;
+    if (c.cellAspectRatio !== undefined) this.cellAspectRatio = c.cellAspectRatio;
+    if (c.labelMinRequiredCells !== undefined) this.labelMinRequiredCells = c.labelMinRequiredCells;
+    if (c.label !== undefined) this.label = c.label;
+    if (c.todayValue !== undefined) this.todayValue = c.todayValue;
+    this._updateLayout();
   }
 
   @Input()
   get rangeConfig(): MatCalendarRangeConfiguration {
     return {
-       startValue: this.startValue,
-       endValue: this.endValue,
-       comparisonStart: this.comparisonStart,
-       comparisonEnd: this.comparisonEnd,
-       previewStart: this.previewStart,
-       previewEnd: this.previewEnd,
-       isRange: this.isRange
+      startValue: this.startValue,
+      endValue: this.endValue,
+      comparisonStart: this.comparisonStart,
+      comparisonEnd: this.comparisonEnd,
+      previewStart: this.previewStart,
+      previewEnd: this.previewEnd,
+      isRange: this.isRange,
     };
   }
   set rangeConfig(c: MatCalendarRangeConfiguration) {
-      if (c.startValue !== undefined) this.startValue = c.startValue;
-      if (c.endValue !== undefined) this.endValue = c.endValue;
-      if (c.comparisonStart !== undefined) this.comparisonStart = c.comparisonStart;
-      if (c.comparisonEnd !== undefined) this.comparisonEnd = c.comparisonEnd;
-      if (c.previewStart !== undefined) this.previewStart = c.previewStart;
-      if (c.previewEnd !== undefined) this.previewEnd = c.previewEnd;
-      if (c.isRange !== undefined) this.isRange = c.isRange;
+    if (c.startValue !== undefined) this.startValue = c.startValue;
+    if (c.endValue !== undefined) this.endValue = c.endValue;
+    if (c.comparisonStart !== undefined) this.comparisonStart = c.comparisonStart;
+    if (c.comparisonEnd !== undefined) this.comparisonEnd = c.comparisonEnd;
+    if (c.previewStart !== undefined) this.previewStart = c.previewStart;
+    if (c.previewEnd !== undefined) this.previewEnd = c.previewEnd;
+    if (c.isRange !== undefined) this.isRange = c.isRange;
   }
 
   @Input()
   get accessibilityConfig(): MatCalendarAccessibilityConfig {
     return {
-        startDateAccessibleName: this.startDateAccessibleName,
-        endDateAccessibleName: this.endDateAccessibleName
+      startDateAccessibleName: this.startDateAccessibleName,
+      endDateAccessibleName: this.endDateAccessibleName,
     };
   }
   set accessibilityConfig(c: MatCalendarAccessibilityConfig) {
-      if (c.startDateAccessibleName !== undefined) this.startDateAccessibleName = c.startDateAccessibleName;
-      if (c.endDateAccessibleName !== undefined) this.endDateAccessibleName = c.endDateAccessibleName;
+    if (c.startDateAccessibleName !== undefined)
+      this.startDateAccessibleName = c.startDateAccessibleName;
+    if (c.endDateAccessibleName !== undefined) this.endDateAccessibleName = c.endDateAccessibleName;
   }
 
   /** The label for the table. (e.g. "Jan 2017"). */
@@ -378,7 +379,7 @@ export class MatCalendarBody<D = any> implements OnChanges, OnDestroy, AfterView
     }
 
     if (!this._cellPadding) {
-       this._cellPadding = `${(50 * this.cellAspectRatio) / this.numCols}%`;
+      this._cellPadding = `${(50 * this.cellAspectRatio) / this.numCols}%`;
     }
     // Update padding always if ratio or cols changed? Original code checked changes.
     // Simplifying to always update if we are here (config changed)

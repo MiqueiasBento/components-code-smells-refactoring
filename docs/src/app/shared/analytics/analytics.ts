@@ -37,10 +37,7 @@ export class AnalyticsService {
   private _renderer: Renderer2;
   private _document: Document;
 
-  constructor(
-    rendererFactory: RendererFactory2,
-    @Inject(DOCUMENT) document: Document,
-  ) {
+  constructor(rendererFactory: RendererFactory2, @Inject(DOCUMENT) document: Document) {
     this._renderer = rendererFactory.createRenderer(null, null);
     this._document = document;
     this._installGlobalSiteTag();

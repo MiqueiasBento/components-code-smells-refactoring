@@ -2965,7 +2965,8 @@ export function defineCommonDropListTests(config: {
       const fixture = createComponent(DraggableInDropZone);
       fixture.detectChanges();
       const item = fixture.componentInstance.dragItems.toArray()[1].element.nativeElement;
-      const styles: CSSStyleDeclaration = fixture.componentInstance.dropInstance.element.nativeElement.style;
+      const styles: CSSStyleDeclaration =
+        fixture.componentInstance.dropInstance.element.nativeElement.style;
 
       // This test only applies to browsers that support scroll snapping.
       if (!('scrollSnapType' in styles) && !('msScrollSnapType' in styles)) {
@@ -2990,7 +2991,8 @@ export function defineCommonDropListTests(config: {
       const fixture = createComponent(DraggableInDropZone);
       fixture.detectChanges();
       const item = fixture.componentInstance.dragItems.toArray()[1].element.nativeElement;
-      const styles: CSSStyleDeclaration = fixture.componentInstance.dropInstance.element.nativeElement.style;
+      const styles: CSSStyleDeclaration =
+        fixture.componentInstance.dropInstance.element.nativeElement.style;
 
       // This test only applies to browsers that support scroll snapping.
       if (!('scrollSnapType' in styles) && !('msScrollSnapType' in styles)) {

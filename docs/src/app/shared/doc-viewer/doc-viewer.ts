@@ -7,54 +7,39 @@
  */
 
 import {
-  ComponentType,
+  CdkPortalOutlet,
   ComponentPortal,
+  ComponentType,
   DomPortalOutlet,
   Portal,
-  CdkPortalOutlet,
 } from '@angular/cdk/portal';
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {DomSanitizer} from '@angular/platform-browser';
+import {HttpErrorResponse} from '@angular/common/http';
 import {
   ApplicationRef,
   Component,
   ElementRef,
   EventEmitter,
-  Injectable,
+  inject,
   Injector,
   Input,
+  input,
   NgZone,
   OnDestroy,
   Output,
   SecurityContext,
-  ViewContainerRef,
-  input,
-  inject,
   Type,
+  ViewContainerRef,
 } from '@angular/core';
-import {Observable, Subscription} from 'rxjs';
-import {shareReplay, take, tap} from 'rxjs/operators';
+import {DomSanitizer} from '@angular/platform-browser';
+import {Subscription} from 'rxjs';
+import {take} from 'rxjs/operators';
 import {ExampleViewer} from '../example-viewer/example-viewer';
-import {HeaderLink} from './header-link';
-import {DeprecatedFieldComponent} from './deprecated-tooltip';
-import {ModuleImportCopyButton} from './module-import-copy-button';
 import {AngularAriaBanner} from './angular-aria-banner/angular-aria-banner';
-
-@Injectable({providedIn: 'root'})
-class DocFetcher {
-  private _http = inject(HttpClient);
-
-  private _cache: Record<string, Observable<string>> = {};
-
-  fetchDocument(url: string): Observable<string> {
-    if (this._cache[url]) {
-      return this._cache[url];
-    }
-
-    const stream = this._http.get(url, {responseType: 'text'}).pipe(shareReplay(1));
-    return stream.pipe(tap(() => (this._cache[url] = stream)));
-  }
-}
+import {DeprecatedFieldComponent} from './deprecated-tooltip';
+import {DocFetcher} from './doc-fetcher';
+import {initExampleViewer} from './doc-viewer-helpers';
+import {HeaderLink} from './header-link';
+import {ModuleImportCopyButton} from './module-import-copy-button';
 
 @Component({
   selector: 'doc-viewer',
@@ -105,30 +90,6 @@ export class DocViewer implements OnDestroy {
 
   /** The document text. It should not be HTML encoded. */
   textContent = '';
-
-  private static _initExampleViewer(
-    exampleViewerComponent: ExampleViewer,
-    example: string,
-    file: string | null,
-    region: string | null,
-  ) {
-    exampleViewerComponent.example = example;
-    if (file) {
-      // if the html div has field `file` then it should be in compact view to show the code
-      // snippet
-      exampleViewerComponent.view.set('snippet');
-      exampleViewerComponent.showCompactToggle.set(true);
-      exampleViewerComponent.file.set(file);
-      if (region) {
-        // `region` should only exist when `file` exists but not vice versa
-        // It is valid for embedded example snippets to show the whole file (esp short files)
-        exampleViewerComponent.region.set(region);
-      }
-    } else {
-      // otherwise it is an embedded demo
-      exampleViewerComponent.view.set('demo');
-    }
-  }
 
   /** Fetch a document by URL. */
   private _fetchDocument(url: string) {
@@ -194,12 +155,7 @@ export class DocViewer implements OnDestroy {
       const exampleViewerComponent = exampleViewer.instance;
       if (example !== null) {
         if (componentClass === ExampleViewer) {
-          DocViewer._initExampleViewer(
-            exampleViewerComponent as ExampleViewer,
-            example,
-            file,
-            region,
-          );
+          initExampleViewer(exampleViewerComponent as ExampleViewer, example, file, region);
         } else {
           (exampleViewerComponent as HeaderLink).example.set(example);
         }
