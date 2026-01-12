@@ -12,7 +12,7 @@
  * @param fromIndex Starting index of the item.
  * @param toIndex Index to which the item should be moved.
  */
-export function moveItemInArray<T = any>(array: T[], fromIndex: number, toIndex: number): void {
+export function moveItemInArray<T = unknown>(array: T[], fromIndex: number, toIndex: number): void {
   const from = clamp(fromIndex, array.length - 1);
   const to = clamp(toIndex, array.length - 1);
 
@@ -37,7 +37,7 @@ export function moveItemInArray<T = any>(array: T[], fromIndex: number, toIndex:
  * @param currentIndex Index of the item in its current array.
  * @param targetIndex Index at which to insert the item.
  */
-export function transferArrayItem<T = any>(
+export function transferArrayItem<T = unknown>(
   currentArray: T[],
   targetArray: T[],
   currentIndex: number,
@@ -60,7 +60,7 @@ export function transferArrayItem<T = any>(
  * @param targetIndex Index at which to insert the item.
  *
  */
-export function copyArrayItem<T = any>(
+export function copyArrayItem<T = unknown>(
   currentArray: T[],
   targetArray: T[],
   currentIndex: number,
